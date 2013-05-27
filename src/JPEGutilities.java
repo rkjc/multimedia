@@ -53,7 +53,7 @@ public class JPEGutilities {
 		for(int y = 0; y < sizeY; y++){
 			for(int x = 0; x < sizeX; x++){	
 				//ycbcr[][][3] = convert(rgb[][][3])
-				arrayYCbCr[x][y] = matrixRGBtoYCbCR(padArrayRGB[x][y]);
+				arrayYCbCr[x][y] = convertRGBtoYCbCR(padArrayRGB[x][y]);
 			}
 		}
 		
@@ -86,9 +86,9 @@ public class JPEGutilities {
 		}
 					
 		// Perform the DCT for Y image, Cb image, and Cr image 
-		double[][] YarrayDCT = runDCTconvertion(arrayY);
-		double[][] CbArrayDCT = runDCTconvertion(subSampleCb);
-		double[][] CrArrayDCT = runDCTconvertion(subSampleCr);
+		double[][] YarrayDCT = runDCTconvertionTrim(arrayY);
+		double[][] CbArrayDCT = runDCTconvertionTrim(subSampleCb);
+		double[][] CrArrayDCT = runDCTconvertionTrim(subSampleCr);
 		
 		// Define for use outside the compression ratio output loop
 		double[][] quantizedY = new double [sizeX][sizeY];
@@ -199,9 +199,9 @@ public class JPEGutilities {
 			double[][] deQuantizedCr = deQuantizeChroma(quantizedCr, quality);
 			
 			// Undo the DCT for Cb image and Cr image and the Y image
-			double[][] invDctArrayY = inverseDCTconvertion(deQuantizedY);
-			double[][] invDctArrayCb = inverseDCTconvertion(deQuantizedCb);
-			double[][] invDctArrayCr = inverseDCTconvertion(deQuantizedCr);
+			double[][] invDctArrayY = reverseDCTconvertion(deQuantizedY);
+			double[][] invDctArrayCb = reverseDCTconvertion(deQuantizedCb);
+			double[][] invDctArrayCr = reverseDCTconvertion(deQuantizedCr);
 			
 			// Supersample prep
 			double[][] outArrayY = new double[sizeX][sizeY];
@@ -232,7 +232,7 @@ public class JPEGutilities {
 			
 			for(int y = 0; y < sizeY; y++){
 				for(int x = 0; x < sizeX; x++){
-					outPadImgArrayRGB[x][y] =  matrixYCbCRtoRGB(outYCbCrArray[x][y]);
+					outPadImgArrayRGB[x][y] =  convertYCbCRtoRGB(outYCbCrArray[x][y]);
 					//debug bypass
 					//outPadImgArrayRGB[x][y] =  matrixYCbCRtoRGB(arrayYCbCr[x][y]);
 				}
@@ -247,6 +247,8 @@ public class JPEGutilities {
 			outImgRGB.display("imgRGB2-quantization= " + quality);
 			
 		} // end calculate compression for-loop
+		
+		
 	}
 	
 //@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -321,7 +323,7 @@ public class JPEGutilities {
 		return unPadImg;
 	}
 	
-	public static double[] matrixRGBtoYCbCR(double[] rgb) {
+	public static double[] convertRGBtoYCbCR(double[] rgb) {
 		double Y = 0.0; double Cb = 0.0; double Cr = 0.0;
 		double R = (double)rgb[0]; double G = (double)rgb[1]; double B = (double)rgb[2];
 		
@@ -340,7 +342,7 @@ public class JPEGutilities {
 		return new double[] {Y, Cb, Cr};
 	}
 	
-	public static double[] matrixYCbCRtoRGB(double[] ycbcr) {
+	public static double[] convertYCbCRtoRGB(double[] ycbcr) {
 		double R = 0.0; double G = 0.0; double B = 0.0;
 		double Y = ycbcr[0]; double Cb = ycbcr[1]; double Cr = ycbcr[2];
 		Y = Y + 128.0;
@@ -362,7 +364,7 @@ public class JPEGutilities {
 		return new double[] {R, G, B};
 	}
 	
-	public static double[][] runDCTconvertion(double[][] f) {			
+	public static double[][] runDCTconvertionTrim(double[][] f) {			
 		int sizeX = f.length;
 		int sizeY = f[0].length;
 		double[][] F = new double[sizeX][sizeY];
@@ -393,7 +395,7 @@ public class JPEGutilities {
 	}
 	
 	
-	public static double[][] inverseDCTconvertion(double[][] Fp) {	// inverses DCT on 8x8 array blocks	
+	public static double[][] reverseDCTconvertion(double[][] Fp) {		
 		int sizeX = Fp.length;
 		int sizeY = Fp[0].length;
 		double[][] fp = new double[sizeX][sizeY];
@@ -436,7 +438,8 @@ public class JPEGutilities {
 		int sizeX = input.length;
 		int sizeY = input[0].length;
 		double[][] output = new double[sizeX][sizeY];
-		double[][] YquantTable = getYquantTable();
+		double[][] YquantTable = getLumaQuantizationTable_HW();
+
 		for(int xx = 0; xx < sizeX; xx += 8){
 			for(int yy = 0; yy < sizeY; yy += 8){
 				
@@ -445,7 +448,7 @@ public class JPEGutilities {
 					for(int y1 = yy; y1 < yy + 8; y1++){
 						y = y1 - yy;
 
-						output[x1][y1] = Math.round(input[x1][y1]/(YquantTable[x][y] * Math.pow(2, n)));
+						output[x1][y1] = Math.round(input[x1][y1] / (YquantTable[x][y] * Math.pow(2, n)) );
 					}
 				}
 			}
@@ -459,7 +462,7 @@ public class JPEGutilities {
 		int sizeX = input.length;
 		int sizeY = input[0].length;
 		double[][] output = new double[sizeX][sizeY];
-		double[][] YquantTable = getYquantTable();
+		double[][] YquantTable = getLumaQuantizationTable_HW();
 		for(int xx = 0; xx < sizeX; xx += 8){
 			for(int yy = 0; yy < sizeY; yy += 8){
 				
@@ -481,7 +484,7 @@ public class JPEGutilities {
 		int sizeX = input.length;
 		int sizeY = input[0].length;
 		double[][] output = new double[sizeX][sizeY];
-		double[][] CromeQuant = getCromeQuant();
+		double[][] CromeQuant = getCromeQuantTable_HW();
 		
 		for(int xx = 0; xx < sizeX; xx += 8){
 			for(int yy = 0; yy < sizeY; yy += 8){
@@ -504,7 +507,7 @@ public class JPEGutilities {
 		int sizeX = input.length;
 		int sizeY = input[0].length;
 		double[][] output = new double[sizeX][sizeY];
-		double[][] CromeQuant = getCromeQuant();
+		double[][] CromeQuant = getCromeQuantTable_HW();
 		
 		for(int xx = 0; xx < sizeX; xx += 8){
 			for(int yy = 0; yy < sizeY; yy += 8){
@@ -552,15 +555,14 @@ public class JPEGutilities {
 	
 	public static double[] blockToSequence(double[][] input) {
 		double[] output = new double[64];
-		int[][] zigzag = generateZigzagPattern();	
+		int[][] zigzag = getZigzagPattern();	
 		for(int i = 0; i < 64; i++){
 			output[i] = input[zigzag[i][0]][zigzag[i][1]];
 		}	
 		return output;
 	}
 	
-
-	public static int[][] generateZigzagPattern() {
+	public static int[][] getZigzagPattern() {
 		int[][] zigzag = new  int[64][2]; //L = 0; R = 1
 		zigzag[0][0] = 0;
 		zigzag[0][1] = 0;
@@ -636,9 +638,10 @@ public class JPEGutilities {
 		}
 		return zigzag;
 	}
+
 	
-	public static double[][] getYquantTable() {
-double[][] table = new double[8][8];
+	public static double[][] getLumaQuantizationTable_HW() {
+		double[][] table = new double[8][8];
 		
 		table[0][0] = 4;
 		table[1][0] = 4;
@@ -715,8 +718,10 @@ double[][] table = new double[8][8];
 		return table;
 	}
 	
-	public static double[][] getCromeQuant() {
-double[][] table = new double[8][8];
+
+	
+	public static double[][] getCromeQuantTable_HW() {
+		double[][] table = new double[8][8];
 		
 		table[0][0] = 8;
 		table[1][0] = 8;

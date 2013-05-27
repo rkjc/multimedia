@@ -53,7 +53,7 @@ public class JPEGutilitiesAlt {
 		for(int y = 0; y < sizeY; y++){
 			for(int x = 0; x < sizeX; x++){	
 				//ycbcr[][][3] = convert(rgb[][][3])
-				arrayYCbCr[x][y] = matrixRGBtoYCbCR(padArrayRGB[x][y]);
+				arrayYCbCr[x][y] = convertRGBtoYCbCR(padArrayRGB[x][y]);
 			}
 		}
 		
@@ -86,9 +86,9 @@ public class JPEGutilitiesAlt {
 		}
 					
 		// Perform the DCT for Y image, Cb image, and Cr image 
-		double[][] YarrayDCT = runDCTconvertion(arrayY);
-		double[][] CbArrayDCT = runDCTconvertion(subSampleCb);
-		double[][] CrArrayDCT = runDCTconvertion(subSampleCr);
+		double[][] YarrayDCT = runDCTconvertionTrim(arrayY);
+		double[][] CbArrayDCT = runDCTconvertionTrim(subSampleCb);
+		double[][] CrArrayDCT = runDCTconvertionTrim(subSampleCr);
 		
 		// Define for use outside the compression ratio output loop
 		double[][] quantizedY = new double [sizeX][sizeY];
@@ -133,7 +133,7 @@ public class JPEGutilitiesAlt {
 						}
 					}
 					// Convert from 2D block to 1D sequence (zigzag)
-					double[] sequence = blockToSequenceInvert(block);
+					double[] sequence = blockToSequenceAlt(block);  // <<<--------###############  major change between main and Alt version
 					// Perform a run length encode of 1D sequence and count number of sequence pairs for the AC component
 					bitCostY += (9 - quality);  // Adds the DC for that block
 					countY = runLengthEncode(sequence); 
@@ -153,7 +153,7 @@ public class JPEGutilitiesAlt {
 						}
 					}
 					// Convert from 2D block to 1D sequence (zigzag)
-					double[] sequence = blockToSequenceInvert(block);
+					double[] sequence = blockToSequenceAlt(block);  // <<<--------###############  major change between main and Alt version
 					// Perform a run length encode of 1D sequence and count number of sequence pairs
 					bitCostCb += (8 - quality);
 					countCb = runLengthEncode(sequence);
@@ -172,7 +172,7 @@ public class JPEGutilitiesAlt {
 						}
 					}
 					// Convert from 2D block to 1D sequence (zigzag)
-					double[] sequence = blockToSequenceInvert(block);
+					double[] sequence = blockToSequenceAlt(block);  // <<<--------###############  major change between main and Alt version
 					// Perform a run length encode of 1D sequence and count number of sequence pairs
 					bitCostCr += (8 - quality);
 					countCr = runLengthEncode(sequence);
@@ -199,9 +199,9 @@ public class JPEGutilitiesAlt {
 			double[][] deQuantizedCr = deQuantizeChroma(quantizedCr, quality);
 			
 			// Undo the DCT for Cb image and Cr image and the Y image
-			double[][] invDctArrayY = inverseDCTconvertion(deQuantizedY);
-			double[][] invDctArrayCb = inverseDCTconvertion(deQuantizedCb);
-			double[][] invDctArrayCr = inverseDCTconvertion(deQuantizedCr);
+			double[][] invDctArrayY = reverseDCTconvertion(deQuantizedY);
+			double[][] invDctArrayCb = reverseDCTconvertion(deQuantizedCb);
+			double[][] invDctArrayCr = reverseDCTconvertion(deQuantizedCr);
 			
 			// Supersample prep
 			double[][] outArrayY = new double[sizeX][sizeY];
@@ -232,7 +232,7 @@ public class JPEGutilitiesAlt {
 			
 			for(int y = 0; y < sizeY; y++){
 				for(int x = 0; x < sizeX; x++){
-					outPadImgArrayRGB[x][y] =  matrixYCbCRtoRGB(outYCbCrArray[x][y]);
+					outPadImgArrayRGB[x][y] =  convertYCbCRtoRGB(outYCbCrArray[x][y]);
 					//debug bypass
 					//outPadImgArrayRGB[x][y] =  matrixYCbCRtoRGB(arrayYCbCr[x][y]);
 				}
@@ -247,6 +247,8 @@ public class JPEGutilitiesAlt {
 			outImgRGB.display("imgRGB2-quantization= " + quality);
 			
 		} // end calculate compression for-loop
+		
+		
 	}
 	
 //@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -321,7 +323,7 @@ public class JPEGutilitiesAlt {
 		return unPadImg;
 	}
 	
-	public static double[] matrixRGBtoYCbCR(double[] rgb) {
+	public static double[] convertRGBtoYCbCR(double[] rgb) {
 		double Y = 0.0; double Cb = 0.0; double Cr = 0.0;
 		double R = (double)rgb[0]; double G = (double)rgb[1]; double B = (double)rgb[2];
 		
@@ -340,7 +342,7 @@ public class JPEGutilitiesAlt {
 		return new double[] {Y, Cb, Cr};
 	}
 	
-	public static double[] matrixYCbCRtoRGB(double[] ycbcr) {
+	public static double[] convertYCbCRtoRGB(double[] ycbcr) {
 		double R = 0.0; double G = 0.0; double B = 0.0;
 		double Y = ycbcr[0]; double Cb = ycbcr[1]; double Cr = ycbcr[2];
 		Y = Y + 128.0;
@@ -384,7 +386,7 @@ public class JPEGutilitiesAlt {
 								subSum += Math.cos(((2.0*x + 1.0)*u*Math.PI)/(16.0)) * Math.cos(((2.0*y + 1.0)*v*Math.PI)/(16.0)) * f[x1][y1];;
 							}
 						}
-						F[u1][v1] = Math.max(Math.min(((Cfunc(u) * Cfunc(v)) / 4.0) * subSum, 1024.0), -1024.0);
+						F[u1][v1] = (Cfunc((double)u) * Cfunc((double)v) / 4.0) * subSum;
 					}
 				}	
 			}
@@ -392,8 +394,37 @@ public class JPEGutilitiesAlt {
 		return F;
 	}
 	
+	public static double[][] runDCTconvertionTrim(double[][] f) {		//what the homework asks for
+		int sizeX = f.length;
+		int sizeY = f[0].length;
+		double[][] F = new double[sizeX][sizeY];
+		int u, v, x, y;
+		for(int xx = 0; xx < sizeX; xx += 8){
+			for(int yy = 0; yy < sizeY; yy += 8){
+				
+			
+				for(int u1 = xx; u1 < xx + 8; u1++){
+					u = u1 - xx;
+					for(int v1 = yy; v1 < yy + 8; v1++){
+						v = v1 - yy;
+						double subSum = 0.0;
+						for(int x1 = xx; x1 < xx + 8; x1++){
+							x = x1 - xx;
+							for(int y1 = yy; y1 < yy + 8; y1++){
+								y = y1 - yy;
+								
+								subSum += Math.cos(((2.0*x + 1.0)*(double)u*Math.PI)/(16.0)) * Math.cos(((2.0*y + 1.0)*(double)v*Math.PI)/(16.0)) * f[x1][y1];;
+							}
+						}
+						F[u1][v1] = Math.max(Math.min(((Cfunc((double)u) * Cfunc((double)v)) / 4.0) * subSum, 1024.0), -1024.0);
+					}
+				}	
+			}
+		}	
+		return F;
+	}
 	
-	public static double[][] inverseDCTconvertion(double[][] Fp) {	// inverses DCT on 8x8 array blocks	
+	public static double[][] reverseDCTconvertion(double[][] Fp) {	// inverses DCT on 8x8 array blocks	
 		int sizeX = Fp.length;
 		int sizeY = Fp[0].length;
 		double[][] fp = new double[sizeX][sizeY];
@@ -423,11 +454,108 @@ public class JPEGutilitiesAlt {
 		return fp;
 	}
 	
+	public static double[][] runDCTconvertionAlt(double[][] f) {			
+		int sizeX = f.length;
+		int sizeY = f[0].length;
+		double temp = 0.0;
+		double[][] F = new double[sizeX][sizeY];
+		int u, v, x, y;
+		for(int yy = 0; yy < sizeY; yy += 8){
+			for(int xx = 0; xx < sizeX; xx += 8){
+				
+					for(int u1 = xx; u1 < xx + 8; u1++){
+						u = u1 - xx;
+						for(int v1 = yy; v1 < yy + 8; v1++){
+							v = v1 - yy;
+							double subSum = 0.0;
+							for(int x1 = xx; x1 < xx + 8; x1++){
+								x = x1 - xx;
+								for(int y1 = yy; y1 < yy + 8; y1++){
+									y = y1 - yy;
+									temp =  f[x1][y1] - 128;
+									subSum += Math.cos(((2.0*x + 1.0)*u*Math.PI)/(16.0)) * Math.cos(((2.0*y + 1.0)*v*Math.PI)/(16.0)) * temp;
+								}
+							}
+					F[u1][v1] = Math.max(Math.min(((Cfunc(u) * Cfunc(v)) / 4.0) * subSum, 1024.0), -1024.0);
+					}
+				}	
+			}
+		}	
+		return F;
+	}
+	
+	public static double[][] reverseDCTconvertionAlt(double[][] Fp) {
+		int sizeX = Fp.length;
+		int sizeY = Fp[0].length;
+		double[][] fp = new double[sizeX][sizeY];
+		int u, v, x, y;
+		
+		for(int xx = 0; xx < sizeX; xx += 8){
+			for(int yy = 0; yy < sizeY; yy += 8){
+				
+				for(int x1 = xx; x1 < xx + 8; x1++){
+					x = x1 - xx;
+					for(int y1 = yy; y1 < yy + 8; y1++){
+						y = y1 - yy;
+						double subSum = 0.0;
+						for(int u1 = xx; u1 < xx + 8; u1++){
+							u = u1 - xx;
+							for(int v1 = yy; v1 < yy + 8; v1++){
+								v = v1 - yy;
+								subSum += Cfunc(u) * Cfunc(v) * Fp[u1][v1] * Math.cos(((2.0*x + 1.0)*u*Math.PI)/(16.0)) * Math.cos(((2.0*y + 1.0)*v*Math.PI)/(16.0));
+							}
+						}
+						fp[x1][y1] = ((1.0 / 4.0) * subSum) + 128;
+					}
+				}
+			}
+		}
+		return fp;
+	}
+	
 	public static double Cfunc(double x) {
 		if(x == 0)
 			return Math.sqrt(2.0) / 2.0;
 		else
 			return 1.0;
+	}
+	
+	public static double[][] quantize(double[][] input, int n, double[][] quantizeTable){
+		int x, y;
+		int sizeX = input.length;
+		int sizeY = input[0].length;
+		double[][] output = new double[sizeX][sizeY];	
+		for(int xx = 0; xx < sizeX; xx += 8){
+			for(int yy = 0; yy < sizeY; yy += 8){			
+				for(int x1 = xx; x1 < xx + 8; x1++){
+					x = x1 - xx;
+					for(int y1 = yy; y1 < yy + 8; y1++){
+						y = y1 - yy;
+						output[x1][y1] = Math.round( input[x1][y1] / (quantizeTable[x][y] * Math.pow(2.0, n)) );
+					}
+				}
+			}
+		}
+		return output;
+	}
+	
+	public static double[][] deQuantize(double[][] input, int n, double[][] quantizeTable){
+		int x, y;
+		int sizeX = input.length;
+		int sizeY = input[0].length;
+		double[][] output = new double[sizeX][sizeY];
+		for(int xx = 0; xx < sizeX; xx += 8){
+			for(int yy = 0; yy < sizeY; yy += 8){		
+				for(int x1 = xx; x1 < xx + 8; x1++){
+					x = x1 - xx;
+					for(int y1 = yy; y1 < yy + 8; y1++){
+						y = y1 - yy;
+						output[x1][y1] = Math.round( input[x1][y1] * (quantizeTable[x][y] * Math.pow(2, n)) );
+					}
+				}
+			}
+		}
+		return output;
 	}
 
 	
@@ -436,8 +564,8 @@ public class JPEGutilitiesAlt {
 		int sizeX = input.length;
 		int sizeY = input[0].length;
 		double[][] output = new double[sizeX][sizeY];
-		double[][] YquantTable = getYquantTableAlt1();  // debug
-		//double[][] YquantTable = getYquantTable();
+		double[][] YquantTable = getLumaQuantizationTable_HW();
+
 		for(int xx = 0; xx < sizeX; xx += 8){
 			for(int yy = 0; yy < sizeY; yy += 8){
 				
@@ -446,7 +574,7 @@ public class JPEGutilitiesAlt {
 					for(int y1 = yy; y1 < yy + 8; y1++){
 						y = y1 - yy;
 
-						output[x1][y1] = Math.round(input[x1][y1] / (YquantTable[x][y] * Math.pow(2, n)) );
+						output[x1][y1] = Math.round( input[x1][y1] / (YquantTable[x][y] * Math.pow(2, n)) );
 					}
 				}
 			}
@@ -460,7 +588,7 @@ public class JPEGutilitiesAlt {
 		int sizeX = input.length;
 		int sizeY = input[0].length;
 		double[][] output = new double[sizeX][sizeY];
-		double[][] YquantTable = getYquantTable();
+		double[][] YquantTable = getLumaQuantizationTable_HW();
 		for(int xx = 0; xx < sizeX; xx += 8){
 			for(int yy = 0; yy < sizeY; yy += 8){
 				
@@ -469,7 +597,7 @@ public class JPEGutilitiesAlt {
 					for(int y1 = yy; y1 < yy + 8; y1++){
 						y = y1 - yy;
 
-						output[x1][y1] = Math.round(input[x1][y1] * (YquantTable[x][y] * Math.pow(2, n)));
+						output[x1][y1] = Math.round( input[x1][y1] * (YquantTable[x][y] * Math.pow(2, n)) );
 					}
 				}
 			}
@@ -482,7 +610,7 @@ public class JPEGutilitiesAlt {
 		int sizeX = input.length;
 		int sizeY = input[0].length;
 		double[][] output = new double[sizeX][sizeY];
-		double[][] CromeQuant = getCromeQuant();
+		double[][] CromeQuant = getCromeQuantTable_HW();
 		
 		for(int xx = 0; xx < sizeX; xx += 8){
 			for(int yy = 0; yy < sizeY; yy += 8){
@@ -505,7 +633,7 @@ public class JPEGutilitiesAlt {
 		int sizeX = input.length;
 		int sizeY = input[0].length;
 		double[][] output = new double[sizeX][sizeY];
-		double[][] CromeQuant = getCromeQuant();
+		double[][] CromeQuant = getCromeQuantTable_HW();
 		
 		for(int xx = 0; xx < sizeX; xx += 8){
 			for(int yy = 0; yy < sizeY; yy += 8){
@@ -528,11 +656,9 @@ public class JPEGutilitiesAlt {
 		int pairCount = 0;
 		double[][] RLEpairs = new double[64][2];
 		double preValue = inSequence[1];  
-		//double preValue = inSequence[0];   //breaks the code - make redblack work
 		int cc = 1;
 		int i = 0;
 		for(i = 2; i < 64; i++){
-		//for(i = 1; i < 64; i++){  //breaks the code - make redblack work
 			if(inSequence[i] == preValue){
 				cc++;
 			}
@@ -553,23 +679,158 @@ public class JPEGutilitiesAlt {
 	
 	public static double[] blockToSequence(double[][] input) {
 		double[] output = new double[64];
-		int[][] zigzag = generateZigzagPattern();	
+		int[][] zigzag = getZigzagPattern();	
 		for(int i = 0; i < 64; i++){
 			output[i] = input[zigzag[i][0]][zigzag[i][1]];
 		}	
 		return output;
 	}
-	
-	public static double[] blockToSequenceInvert(double[][] input) {
+
+	public static double[] blockToSequenceAlt(double[][] input) {
 		double[] output = new double[64];
-		int[][] zigzag = generateZigzagPatternInvert();	
+		int[][] zigzag = getZigzagPatternAlt();	
 		for(int i = 0; i < 64; i++){
 			output[i] = input[zigzag[i][0]][zigzag[i][1]];
 		}	
 		return output;
 	}
 	
-	public static int[][] generateZigzagPatternInvert() {
+	public static void printArray(double[] F){
+		int X = F.length;
+		for(int x = 0; x < X; x++){
+			//System.out.format("%.1d", F[u][v]);
+			System.out.print(F[x] + "  ");
+			System.out.print("\t");
+		}
+		System.out.println("");
+	}
+
+	public static void printArray(double[][] F){
+		int X = F.length;
+		int Y = F[0].length;
+		for(int y = 0; y < Y; y++){
+			for(int x = 0; x < X; x++){
+				System.out.format("%.2f\t\t", F[x][y]);
+				//System.out.print(F[x][y] + "  ");
+				//System.out.print("\t");
+			}
+			System.out.println("");
+		}	
+		System.out.println("");
+	}
+	
+	public static void printArray(double[][][] F){
+		int X = F.length;
+		int Y = F[0].length;
+			for(int m = 0; m < 3; m++){
+			for(int y = 0; y < Y; y++){
+				for(int x = 0; x < X; x++){
+					System.out.format("%.2f\t\t", F[x][y][m]);
+					//System.out.print(F[x][y][m] + "  ");
+					//System.out.print("\t\t");
+				}
+				System.out.println("");
+			}	
+			System.out.println("");
+		}
+		System.out.println("");
+	}
+	
+	public static void printArrayIntView(double[][] F){
+		int X = F.length;
+		int Y = F[0].length;
+		for(int y = 0; y < Y; y++){
+			for(int x = 0; x < X; x++){
+				//System.out.format("%.2f\t\t", F[x][y]);
+				System.out.print((int)Math.round(F[x][y]) + "\t");
+				//System.out.print("\t");
+			}
+			System.out.println("");
+		}	
+		System.out.println("");
+	}
+	
+	public static int[][] getZigzagPattern() {
+		int[][] zigzag = new  int[64][2]; //L = 0; R = 1
+		zigzag[0][0] = 0;
+		zigzag[0][1] = 0;
+		zigzag[1][0] = 1;
+		zigzag[1][1] = 0;
+		
+		int L = 1;
+		int R = 0;
+		int index = 1;	
+		
+		while(true){
+			while(L != 0){
+				index++;
+				L--;
+				R++;
+				zigzag[index][0] = L;
+				zigzag[index][1] = R;
+			}
+			if(L == 0 && R == 7)
+				break;
+			index++;
+			R++;
+			zigzag[index][0] = L;
+			zigzag[index][1] = R;
+	
+			while(R != 0 ){
+				index++;
+				L++;
+				R--;
+				zigzag[index][0] = L;
+				zigzag[index][1] = R;
+			}
+			
+			index++;
+			L++;
+			zigzag[index][0] = L;
+			zigzag[index][1] = R;
+	
+		}
+			
+			index++;
+			L++;
+			zigzag[index][0] = L;
+			zigzag[index][1] = R;
+			
+		while(true){
+			while(L != 7){
+				index++;
+				L++;
+				R--;
+				zigzag[index][0] = L;
+				zigzag[index][1] = R;
+			}
+			index++;
+			R++;
+			zigzag[index][0] = L;
+			zigzag[index][1] = R;
+			
+			while(R != 7){
+				index++;
+				L--;
+				R++;
+				zigzag[index][0] = L;
+				zigzag[index][1] = R;
+			}
+			index++;
+			L++;
+			zigzag[index][0] = L;
+			zigzag[index][1] = R;
+			
+			if(L == 7 && R == 7)
+				break;
+		}
+
+		return zigzag;
+	}
+
+
+	
+	public static int[][] getZigzagPatternAlt() {
 		int[][] zigzag = new  int[64][2]; 
 		
 		zigzag[0][0] = 0;  zigzag[0][1] = 0;
@@ -654,86 +915,8 @@ public class JPEGutilitiesAlt {
 		return zigzag;
 	}
 
-	public static int[][] generateZigzagPattern() {
-		int[][] zigzag = new  int[64][2]; //x = 0; y = 1
-		zigzag[0][0] = 0;
-		zigzag[0][1] = 0;
-		zigzag[1][0] = 1;
-		zigzag[1][1] = 0;
-		
-		int x = 1;
-		int y = 0;
-		int index = 1;	
-		
-		while(true){
-			while(x != 0){
-				index++;
-				x--;
-				y++;
-				zigzag[index][0] = x;
-				zigzag[index][1] = y;
-			}
-			if(x == 0 && y == 7)
-				break;
-			index++;
-			y++;
-			zigzag[index][0] = x;
-			zigzag[index][1] = y;
 	
-			while(y != 0 ){
-				index++;
-				x++;
-				y--;
-				zigzag[index][0] = x;
-				zigzag[index][1] = y;
-			}
-			
-			index++;
-			x++;
-			zigzag[index][0] = x;
-			zigzag[index][1] = y;
-	
-		}
-			
-			index++;
-			x++;
-			zigzag[index][0] = x;
-			zigzag[index][1] = y;
-			
-		while(true){
-			while(x != 7){
-				index++;
-				x++;
-				y--;
-				zigzag[index][0] = x;
-				zigzag[index][1] = y;
-			}
-			index++;
-			y++;
-			zigzag[index][0] = x;
-			zigzag[index][1] = y;
-			
-			while(y != 7){
-				index++;
-				x--;
-				y++;
-				zigzag[index][0] = x;
-				zigzag[index][1] = y;
-			}
-			index++;
-			x++;
-			zigzag[index][0] = x;
-			zigzag[index][1] = y;
-			
-			if(x == 7 && y == 7)
-				break;
-		}
-		return zigzag;
-	}
-	
-	
-	
-	public static double[][] getYquantTable() {
+	public static double[][] getLumaQuantizationTable_HW() {
 		double[][] table = new double[8][8];
 		
 		table[0][0] = 4;
@@ -811,86 +994,10 @@ public class JPEGutilitiesAlt {
 		return table;
 	}
 	
-	public static double[][] getYquantTableAlt1() {
-		double[][] table = new double[8][8];
-		
-		table[0][0] = 4;
-		table[1][0] = 4;
-		table[2][0] = 4;
-		table[3][0] = 8;
-		table[4][0] = 8;
-		table[5][0] = 16;
-		table[6][0] = 16;
-		table[7][0] = 32;
-		
-		table[0][1] = 4;
-		table[1][1] = 4;
-		table[2][1] = 8;
-		table[3][1] = 8;
-		table[4][1] = 16;
-		table[5][1] = 16;
-		table[6][1] = 16;
-		table[7][1] = 32;
-		
-		table[0][2] = 4;
-		table[1][2] = 8;
-		table[2][2] = 8;
-		table[3][2] = 16;
-		table[4][2] = 16;
-		table[5][2] = 16;
-		table[6][2] = 32;
-		table[7][2] = 32;
-		
-		table[0][3] = 8;
-		table[1][3] = 8;
-		table[2][3] = 16;
-		table[3][3] = 16;
-		table[4][3] = 16;
-		table[5][3] = 32;
-		table[6][3] = 32;
-		table[7][3] = 32;
-		
-		table[0][4] = 8;
-		table[1][4] = 16;
-		table[2][4] = 16;
-		table[3][4] = 16;
-		table[4][4] = 32;
-		table[5][4] = 32;
-		table[6][4] = 32;
-		table[7][4] = 32;
-		
-		table[0][5] = 16;
-		table[1][5] = 16;
-		table[2][5] = 16;
-		table[3][5] = 32;
-		table[4][5] = 32;
-		table[5][5] = 32;
-		table[6][5] = 32;
-		table[7][5] = 32;
-		
-		table[0][6] = 16;
-		table[1][6] = 16;
-		table[2][6] = 32;
-		table[3][6] = 32;
-		table[4][6] = 32;
-		table[5][6] = 32;
-		table[6][6] = 32;
-		table[7][6] = 32;
-		
-		table[0][7] = 32;
-		table[1][7] = 32;
-		table[2][7] = 32;
-		table[3][7] = 32;
-		table[4][7] = 32;
-		table[5][7] = 32;
-		table[6][7] = 32;
-		table[7][7] = 32; 
-		
-		return table;
-	}
+
 	
-	public static double[][] getCromeQuant() {
-double[][] table = new double[8][8];
+	public static double[][] getCromeQuantTable_HW() {
+		double[][] table = new double[8][8];
 		
 		table[0][0] = 8;
 		table[1][0] = 8;
@@ -966,5 +1073,6 @@ double[][] table = new double[8][8];
 		
 		return table;
 	}
+
 
 }

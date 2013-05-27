@@ -29,9 +29,6 @@ public class CS451_Cross {
 	
 		System.out.println("--Welcome to Multimedia Software System--");
 		System.out.println("   CS-451 spring 2013    Richard Cross");
-		
-		//test if file extension is .ppm - if true run homework_one
-		//if file is text run homework_two - This may change depending on what homework_three uses
 
 		while (true) {			
 			switch (getMainMenu()) {
@@ -251,32 +248,45 @@ public class CS451_Cross {
 				return;
 			}
 		}
+		System.out.println("\n----- JPG Processing and Analysis method selection -----");
+		System.out.println("           File to process is " + file.getName());
+		System.out.println("\n1. Run JPG process version 1 - using algorithms given in homework");
+		System.out.println("2. Run JPG process version 2 - using algorithms that give expected answers");
 		
-		JPEGutilitiesAlt.processJPG(file);
+		if(readInputInteger() == 1) {
+			JPEGutilities.processJPG(file);
+		} else {
+			JPEGutilitiesAlt.processJPG(file);
+		}
 		
 		while (true) {
-			System.out.println("1. Select another file to process");
-			System.out.println("2. return to main menu");
+			System.out.println("\n-----  JPG Processing and Analysis method selections  -----");
+			System.out.println("          File to process is " + file.getName());
+			System.out.println("\n1. Run JPG process version 1 - using algorithms given in homework");
+			System.out.println("2. Run JPG process version 2 - using algorithms that give expected answers\n");
+			System.out.println("3. Select another file to process");
+			System.out.println("4. return to previous menu");
 			
 			int h3In = readInputInteger();
 
 			switch (h3In) { 
-				case 1: // 1 - new file entry
+				case 1:
+					JPEGutilities.processJPG(file);
+					break;
+				case 2:
+					JPEGutilitiesAlt.processJPG(file);
+					break;
+				case 3: // 1 - new file entry
 					file = getUserFileSelection();
 					if(!file.isFile()){
 						System.out.println("could not find selected file");
 						return;
 					}
-					JPEGutilitiesAlt.processJPG(file);
 					break;
 				default:
 				return;
 			}
 		}
-	}
-	
-	public static void get_H3_MenuInput() {
-		
 	}
 	
 	public static void runHomework_Four(File file){
@@ -349,13 +359,16 @@ public class CS451_Cross {
 		System.out.println("please enter the max size of dictionary to use");
 		return readInputInteger();	
 	}
-
-		
+	
+	public static void get_H3_MenuInput() {
+		// Intentionally blank
+	}
+	
 	public static File getUserFileSelection() {
 		File file = new File("");
 	
 		System.out.println("");
-		System.out.println("----- enter input data source file path and name -----");
+		System.out.println("----- please select the method for file entry -----");
 
 		while(!file.isFile()){
 			System.out.println("1. input file name directly");
@@ -368,7 +381,7 @@ public class CS451_Cross {
 			case 0:
 				break;
 			case 1:
-				System.out.println("Please enter name of file to encode");
+				System.out.println("** Please enter name of file to encode **");
 				try {
 					InputStreamReader inreader = new InputStreamReader(System.in);
 					BufferedReader inName = new BufferedReader(inreader);
@@ -441,16 +454,14 @@ public class CS451_Cross {
 		}
 		return Integer.parseInt(stringIn);
 	}
-	
 
-	
 	public static boolean isInteger(String s) {
 	    try { 
 	        Integer.parseInt(s); 
 	    } catch(NumberFormatException e) { 
 	        return false; 
 	    }	    
-	    return true; // only got here if we didn't return false
+	    return true;
 	}
 	
 	
