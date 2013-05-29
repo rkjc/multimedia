@@ -1,16 +1,51 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 
 public class LectureDemosUsingJPEGutilitiesAltMethods extends JPEGutilitiesAlt{
 
-public static void main(String[] args) {
+	public static void main(String[] args) {
 		
-		//demo1();	// Lecture 08, page 9, example - reversability of both versions
-		//demo2(); 	//Lecture 08, page 9, example - quantized coefficients of both versions
-		//demo3();	//Lecture 08, page 10, example
-		//demo4();	//Lecture 08, page 11, top frame example
-		//demo5();	//Lecture 08, page 11, bottom frame example
-		//demo6();	//Lecture 08, JPEG supplemental Page
-	
-		demo7(); // all black
+		boolean runDemo = true;
+		while(runDemo){
+			System.out.println("\nPlease select a demo to run\n");
+			System.out.println("1. demo1();	// Lecture 08, page 9, example - reversability of both versions");
+			System.out.println("2. demo2(); 	//Lecture 08, page 9, example - quantized coefficients of both versions");
+			System.out.println("3. demo3();	//Lecture 08, page 10, example");
+			System.out.println("4. demo4();	//Lecture 08, page 11, top frame example");
+			System.out.println("5. demo5();	//Lecture 08, page 11, bottom frame example");
+			System.out.println("6. demo6();	//Lecture 08, JPEG supplemental Page");
+			System.out.println("7. demo7(); // all black");
+			System.out.println("8. exit");
+			
+			switch(readInputInteger()){
+			case 1:
+				demo1();
+				break;
+			case 2:
+				demo2();
+				break;
+			case 3:
+				demo3();
+				break;
+			case 4:
+				demo4();
+				break;
+			case 5:
+				demo5();
+				break;
+			case 6:
+				demo6();
+				break;
+			case 7:
+				demo7();
+				break;
+			default:
+				runDemo = false;	
+			}
+			System.out.println("\n--- Good Bye ---");
+		}
 	}
 	
 	public static void demo1(){
@@ -253,6 +288,31 @@ public static void main(String[] args) {
 		double[][] DCTaltR = reverseDCTconvertionAlt(DCTalt);
 		printArray(DCTaltR);
 		
+	}
+	
+	public static int readInputInteger(){
+		InputStreamReader inreader = new InputStreamReader(System.in);
+		BufferedReader in = new BufferedReader(inreader);
+		String stringIn = "";
+		
+		while(!isInteger(stringIn)){	
+			try{	
+				stringIn = in.readLine();
+			} catch (IOException err) {
+				System.out.println("oops - fatal error reading line");
+				System.exit(1);
+			}
+		}
+		return Integer.parseInt(stringIn);
+	}
+
+	public static boolean isInteger(String s) {
+	    try { 
+	        Integer.parseInt(s); 
+	    } catch(NumberFormatException e) { 
+	        return false; 
+	    }	    
+	    return true;
 	}
 	
 	public static double[][] getLumaQuantizationTable_HW() {
