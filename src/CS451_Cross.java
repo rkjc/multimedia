@@ -1,5 +1,5 @@
-//Richard Cross
-//cs-451 Spring 2013
+// Richard Cross
+// CS-451 Spring 2013
 
 
 import java.io.*;
@@ -7,6 +7,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.io.File;
 
 import javax.swing.JFileChooser;
 
@@ -44,6 +45,10 @@ public class CS451_Cross {
 				case 3: //   homework 3  
 					runHomework_Three(file);
 					break;
+					
+				case 4: //   homework 4  
+					runHomework_Four(file);
+					break;
 	
 				default: //main menu selection
 					System.out.println("--Good Bye--");
@@ -53,6 +58,8 @@ public class CS451_Cross {
 		}// end outside while
 	} // end of main
 
+	
+	
 	public static void usage() {
 		System.out.println("\nUsage: java CS451_Cross [inputfile]\n");
 	}
@@ -290,7 +297,36 @@ public class CS451_Cross {
 	}
 	
 	public static void runHomework_Four(File file){
+		File targetFile;
+		File referenceFile;
 		
+		while (true) {
+			System.out.println("\n-----  Block-based Motion Compensation selections  -----\n");	
+			System.out.println("1. Block-Based Motion Compensation");
+			System.out.println("2. Removing Moving Objects");
+			System.out.println("3. return to previous menu");
+			
+			int h3In = readInputInteger();
+
+			switch (h3In) { 
+				case 1:
+					// input file name or number
+					// pass to function
+					targetFile = new File("Walk_007.ppm");
+					referenceFile = new File("Walk_009.ppm");
+					MotionUtilities.motionCompensation(targetFile, referenceFile);
+					break;
+				case 2:
+					// input file name or number
+					// pass to function
+					targetFile = new File("Walk_022.ppm");
+					referenceFile = new File("Walk_020.ppm");
+					MotionUtilities.removeObjects(targetFile, referenceFile);
+					break;
+				default:
+				return;
+			}
+		}	
 	}
 	
 	public static int getMainMenu() {			
@@ -299,7 +335,8 @@ public class CS451_Cross {
 		System.out.println("1. Homework 1 - Image Quantization");
 		System.out.println("2. Homework 2 - Aliasing and Dictionary Coding");
 		System.out.println("3. Homework 3 - DCT Based Image Compression");
-		System.out.println("4. Quit");
+		System.out.println("4. Homework 4 - Block-based Motion Compensation");
+		System.out.println("5. Quit");
 		System.out.println("");
 		System.out.println("Please enter the task number [1-4]:");
 

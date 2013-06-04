@@ -177,4 +177,21 @@ public class ImageUtilities {
 				imgArray[xa][ya] = rgb[0];
 			}
 	}
+	
+	public static double[][][] imageRGBtoDoubleArray(Image img) {
+		int imgX = img.getW();
+		int imgY = img.getH();
+		double[][][] imgArray = new double[imgX][imgY][3];
+		int[] rgb = new int[3];
+		for(int y = 0; y < imgY; y++){
+			for(int x = 0; x < imgX; x++){
+				img.getPixel(x, y, rgb);
+				imgArray[x][y][0] = rgb[0];
+				imgArray[x][y][1] = rgb[1];
+				imgArray[x][y][2] = rgb[2];
+			}
+		}
+		return imgArray;
+	}
+	
 }
