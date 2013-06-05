@@ -166,6 +166,20 @@ public class ImageUtilities {
 			}
 		return output;
 	}
+	
+	public static void arrayToGreyImgDisplay(double input[][], String filename){
+		int x = input.length;
+		int y = input[0].length;
+		Image output = new Image(x, y);
+		int[] rgb = new int[3];
+		for(int xa = 0; xa < x; xa++)
+			for(int ya = 0; ya < y; ya++){
+				rgb[0] = rgb[1] = rgb[2] = (int)input[xa][ya];
+				output.setPixel(xa, ya, rgb);
+			}
+		 output.display("arrayOut_" + filename + ".ppm");
+		 output.write2PPM("arrayOut_" + filename + ".ppm");
+	}
 
 	private static void ImgToArray(Image imgIn, int imgArray[][]){
 		int x = imgIn.getW();

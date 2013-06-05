@@ -312,15 +312,15 @@ public class CS451_Cross {
 				case 1:
 					// input file name or number
 					// pass to function
-					targetFile = new File("Walk_007.ppm");
-					referenceFile = new File("Walk_009.ppm");
+					targetFile = new File("../data/IDB/Walk_060.ppm");
+					referenceFile = new File("../data/IDB/Walk_057.ppm");
 					MotionUtilities.motionCompensation(targetFile, referenceFile);
 					break;
 				case 2:
 					// input file name or number
 					// pass to function
-					targetFile = new File("Walk_022.ppm");
-					referenceFile = new File("Walk_020.ppm");
+					targetFile = new File("../data/IDB/Walk_022.ppm");
+					referenceFile = new File("../data/IDB/Walk_020.ppm");
 					MotionUtilities.removeObjects(targetFile, referenceFile);
 					break;
 				default:
