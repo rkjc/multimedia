@@ -24,6 +24,21 @@ public class MotionUtilities {
 		InOutUtilities.printMotionVectors(motionVectors, targetFile, referenceFile);
 	}
 	
+	public static void motionCompensationSubSample(File targetFile, File referenceFile) {
+		Image refImg = new Image(referenceFile.getPath());
+		Image targetImg = new Image(targetFile.getPath());
+		
+		double[][][] referenceUnpadArray = ImageUtilities.imageRGBtoDoubleArray(refImg);
+		double[][][] targetUnpadArray = ImageUtilities.imageRGBtoDoubleArray(targetImg);	
+		
+		double[][][] targetArray = ImageUtilities.padImageArrayMultipleOf(targetUnpadArray, 16);
+		double[][][] referenceArray = ImageUtilities.padImageArrayMultipleOf(referenceUnpadArray, 16);
+		
+		Pair[][] motionVectors = getMotionVectorsHalfPixel(targetArray, referenceArray, true);	
+		InOutUtilities.writeMotionVectorsFile(motionVectors, targetFile, referenceFile);
+		InOutUtilities.printMotionVectors(motionVectors, targetFile, referenceFile);	
+	}
+	
 	public static void removeMovingObjects_V1(File targetFile, File referenceFile) {		
 		Image refImg = new Image(referenceFile.getPath());
 		Image targetImg = new Image(targetFile.getPath());	
@@ -49,6 +64,10 @@ public class MotionUtilities {
 	}
 	
 		
+	public static Pair[][] getMotionVectorsHalfPixel(double[][][] targetArray, double[][][] referenceArray, boolean displayErrorFrame) {	
+		
+		return null;
+	}
 	
 	public static Pair[][] getMotionVectors(double[][][] targetArray, double[][][] referenceArray, boolean displayErrorFrame) {					
 		int size_X = targetArray.length;
@@ -155,12 +174,6 @@ public class MotionUtilities {
 		return motionVectors;
 	}
 	
-
-	
-	public static void motionCompensationSubSample(File targetImg, File referenceImg) {
-		// %%%%%%%%%%%%%%%%%%%%%	
-	}
-
 
 	public static double[][][] removeObjectMethod_1(double[][][] targetArray, double[][][] referenceArray) {
 		int size_X = targetArray.length;
