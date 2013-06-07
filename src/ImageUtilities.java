@@ -154,7 +154,7 @@ public class ImageUtilities {
 		return arrayToImg(imgArrayOut);
 	}
 	
-	private static Image arrayToImg(int input[][]){
+	public static Image arrayToImg(int input[][]){
 		int x = input.length;
 		int y = input[0].length;
 		Image output = new Image(x, y);
@@ -167,7 +167,25 @@ public class ImageUtilities {
 		return output;
 	}
 	
+	public static Image arrayToImg(double input[][][]){
+		int x = input.length;
+		int y = input[0].length;
+		Image output = new Image(x, y);
+		int[] rgb = new int[3];
+		for(int xa = 0; xa < x; xa++)
+			for(int ya = 0; ya < y; ya++){
+				rgb[0] = (int)input[xa][ya][0];
+				rgb[1] = (int)input[xa][ya][1];
+				rgb[2] = (int)input[xa][ya][2];
+				output.setPixel(xa, ya, rgb);
+			}
+		return output;
+	}
+	
 	public static void arrayToGreyImgDisplay(double input[][], String filename){
+		arrayToGreyImgDisplay(input, filename, false);
+	}
+	public static void arrayToGreyImgDisplay(double input[][], String filename, boolean writeToFile){
 		int x = input.length;
 		int y = input[0].length;
 		Image output = new Image(x, y);
@@ -177,11 +195,12 @@ public class ImageUtilities {
 				rgb[0] = rgb[1] = rgb[2] = (int)input[xa][ya];
 				output.setPixel(xa, ya, rgb);
 			}
-		 output.display("arrayOut_" + filename + ".ppm");
-		 output.write2PPM("arrayOut_" + filename + ".ppm");
+		 output.display(filename);
+		 if(writeToFile)
+			 output.write2PPM("arrayOut_" + filename + ".ppm");
 	}
 
-	private static void ImgToArray(Image imgIn, int imgArray[][]){
+	public static void ImgToArray(Image imgIn, int imgArray[][]){
 		int x = imgIn.getW();
 		int y = imgIn.getH();
 		int[] rgb = new int[3];
@@ -208,4 +227,78 @@ public class ImageUtilities {
 		return imgArray;
 	}
 	
+	public static double[][] convertTo8bitGrayArray(double[][][] imgArray) {
+		int x = imgArray.length;
+		int y = imgArray[0].length;
+		double[][] outputArray = new double[x][y];
+
+		for (int yy = 0; yy < y; yy++) {
+			for (int xx = 0; xx < x; xx++) {
+				double grey =  Math.round(0.299 * imgArray[xx][yy][0] + 0.587 * imgArray[xx][yy][1] + 0.114 * imgArray[xx][yy][2]);
+				grey = Math.min(grey, 255);
+				outputArray[xx][yy] = grey;
+			}
+		}
+		return outputArray;
+	}
+	
+	public static double[][][] padImageArrayMultipleOf(double[][][] origImg, int padMultiple) {
+		// Don't care about undoing it version of the method
+		int[] padXreturn = new int[1];
+		int[] padYreturn = new int[1];
+		return padImageArrayMultipleOf( origImg,  padMultiple, padXreturn,padYreturn);
+	}
+	public static double[][][] padImageArrayMultipleOf(double[][][] origImg, int padMultiple, int[] padXreturn, int[] padYreturn) {
+		// Pads the image with grey (128, 128, 128)
+		int imgOrigSizeX = origImg.length;
+		int imgOrigSizeY = origImg[0].length;
+
+		int padX = 0;
+		if(imgOrigSizeX % padMultiple > 0)
+			padX = padMultiple - imgOrigSizeX % padMultiple;
+		int padY = 0;
+		if(imgOrigSizeY % padMultiple > 0)
+			padY = padMultiple - imgOrigSizeY % padMultiple;
+		
+		padXreturn[0] = padX;
+		padYreturn[0] = padY;
+		
+		int sizeX = imgOrigSizeX + padX;
+		int sizeY = imgOrigSizeY + padY;
+							
+		double[][][] paddedImg = new double[sizeX][sizeY][3];
+		for(int y = 0; y < sizeY; y++){
+			for(int x = 0; x < sizeX; x++){
+				if(x < imgOrigSizeX && y < imgOrigSizeY){
+					paddedImg[x][y][0] = origImg[x][y][0];
+					paddedImg[x][y][1] = origImg[x][y][1];
+					paddedImg[x][y][2] = origImg[x][y][2];
+				} else {
+					paddedImg[x][y][0] = 128;
+					paddedImg[x][y][1] = 128;
+					paddedImg[x][y][2] = 128;
+				}
+			}
+		}
+		return paddedImg;
+	}
+	
+	public static double[][][] removePaddingImageArray(double[][][] origImg, int padX, int padY) {
+		// Pads the image with black (0, 0, 0)
+		int imgOrigSizeX = origImg.length;
+		int imgOrigSizeY = origImg[0].length;
+		
+		int sizeX = imgOrigSizeX - padX;
+		int sizeY = imgOrigSizeY - padY;
+							
+		double[][][] unPaddedImg = new double[sizeX][sizeY][3];
+		for(int y = 0; y < sizeY; y++){
+			for(int x = 0; x < sizeX; x++){
+				unPaddedImg[x][y][0] = origImg[x][y][0];
+				unPaddedImg[x][y][1] = origImg[x][y][1];
+				unPaddedImg[x][y][2] = origImg[x][y][2];
+			}
+		}
+		return unPaddedImg;
+	}
 }

@@ -64,9 +64,9 @@ public class CS451_Cross {
 		System.out.println("\nUsage: java CS451_Cross [inputfile]\n");
 	}
 
-	public static void runHomework_One(File file){	
+	public static void runHomework_One(File file){	// 1  1  1  1  1  1  1  1  1  1  1  1  1 
 		if(!file.isFile()){
-			file = getUserFileSelection();
+			file = InOutUtilities.getUserFileSelection();
 			if(!file.isFile()){
 				System.out.println("could not find selected file");
 				return;
@@ -121,7 +121,7 @@ public class CS451_Cross {
 				outimg.write2PPM("out-8bitColor.ppm");
 				break;
 			case 5:
-				file = getUserFileSelection();
+				file = InOutUtilities.getUserFileSelection();
 				if(!file.isFile()){
 					return;
 				}
@@ -140,7 +140,7 @@ public class CS451_Cross {
 		}// end h1 while
 	}
 	
-	public static void runHomework_Two(File file){		
+	public static void runHomework_Two(File file){		// 2  2  2  2  2  2  2  2  2  2  2  2  2  2  2
 		boolean h2 = true;
 		while (h2) {
 			int h2In = get_H2_MenuInput();
@@ -189,11 +189,11 @@ public class CS451_Cross {
 					String origData = "";
 					
 					if(file.isFile()){
-						origData = readFileInput(file);
+						origData = InOutUtilities.readFileInput(file);
 					}
 					else{
-						file = getUserFileSelection();
-						origData = readFileInput(file);
+						file = InOutUtilities.getUserFileSelection();
+						origData = InOutUtilities.readFileInput(file);
 					}
 					
 					if(origData.equals("")){
@@ -229,8 +229,8 @@ public class CS451_Cross {
 					System.out.println("\nencode another file?");
 					System.out.println("1. yes");
 					System.out.println("2. no");
-					if(readInputInteger() == 1){
-						file = getUserFileSelection();
+					if(InOutUtilities.readInputInteger() == 1){
+						file = InOutUtilities.getUserFileSelection();
 						if(!file.isFile())
 							return;
 						loop = true;
@@ -246,10 +246,10 @@ public class CS451_Cross {
 		}// end h2 while
 	}
 
-	public static void runHomework_Three(File file){
+	public static void runHomework_Three(File file){	// 3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3 
 		       
 		if(!file.isFile()){
-			file = getUserFileSelection();
+			file = InOutUtilities.getUserFileSelection();
 			if(!file.isFile()){
 				System.out.println("could not find selected file");
 				return;
@@ -260,7 +260,8 @@ public class CS451_Cross {
 		System.out.println("\n1. Run JPG process version 1 - using algorithms given in homework");
 		System.out.println("2. Run JPG process version 2 - using algorithms that give expected answers");
 		
-		if(readInputInteger() == 1) {
+		
+		if(InOutUtilities.readInputInteger() == 1) {
 			JPEGutilities.processJPG(file);
 		} else {
 			JPEGutilitiesAlt.processJPG(file);
@@ -273,8 +274,10 @@ public class CS451_Cross {
 			System.out.println("2. Run JPG process version 2 - using algorithms that give expected answers\n");
 			System.out.println("3. Select another file to process");
 			System.out.println("4. return to previous menu");
+			System.out.println("");
+			System.out.println("Please enter the task number [1-4]:");
 			
-			int h3In = readInputInteger();
+			int h3In = InOutUtilities.readInputInteger();
 
 			switch (h3In) { 
 				case 1:
@@ -284,7 +287,7 @@ public class CS451_Cross {
 					JPEGutilitiesAlt.processJPG(file);
 					break;
 				case 3: // 1 - new file entry
-					file = getUserFileSelection();
+					file = InOutUtilities.getUserFileSelection();
 					if(!file.isFile()){
 						System.out.println("could not find selected file");
 						return;
@@ -296,7 +299,7 @@ public class CS451_Cross {
 		}
 	}
 	
-	public static void runHomework_Four(File file){
+	public static void runHomework_Four(File file){	// 4  4  4  4  4  4  4  4  4  4  4  4  4  4  4  4
 		File targetFile;
 		File referenceFile;
 		
@@ -305,23 +308,61 @@ public class CS451_Cross {
 			System.out.println("1. Block-Based Motion Compensation");
 			System.out.println("2. Removing Moving Objects");
 			System.out.println("3. return to previous menu");
+			System.out.println("");
+			System.out.println("Please enter the task number [1-3]:");
 			
-			int h3In = readInputInteger();
+			int h3In = InOutUtilities.readInputInteger();
 
 			switch (h3In) { 
 				case 1:
 					// input file name or number
+					targetFile = InOutUtilities.getH4fileInput();
+					if(targetFile != null){
+						System.out.println("Using as Target file: " + targetFile.getName());
+						System.out.println("");
+					} else {
+						break;
+					}
+					
+					referenceFile = InOutUtilities.getH4fileInput();
+					if(referenceFile != null){	 
+						System.out.println("Using as Reference file: " + referenceFile.getName());
+						System.out.println("");
+					} else {
+						break;
+					}
+					
 					// pass to function
-					targetFile = new File("../data/IDB/Walk_060.ppm");
-					referenceFile = new File("../data/IDB/Walk_057.ppm");
-					MotionUtilities.motionCompensation(targetFile, referenceFile);
+					MotionUtilities.motionCompensation(targetFile, referenceFile);	
 					break;
-				case 2:
-					// input file name or number
-					// pass to function
-					targetFile = new File("../data/IDB/Walk_022.ppm");
-					referenceFile = new File("../data/IDB/Walk_020.ppm");
-					MotionUtilities.removeObjects(targetFile, referenceFile);
+					
+				case 2:	// Remove Motion elements - two methods
+					// Input reference number
+					File[] targetFileA = new File[1];
+					File[] referenceFileA = new File[1];
+					if(!InOutUtilities.getH4fileNumberInput(targetFileA, referenceFileA)){
+						System.out.println("Sorry, had a problem reading the files");
+						break;
+					}
+					targetFile = targetFileA[0];
+					referenceFile = referenceFileA[0];
+					
+					// pass to first method
+					MotionUtilities.removeMovingObjects_V1(targetFile, referenceFile);
+					
+					// Check if this is running on a file system that matches my home system
+					boolean atHome = false;
+					File checkFolder = new File("../data/IDB");
+						atHome = checkFolder.exists();
+					File replacementFile;
+					if(atHome){
+						replacementFile = new File("../data/IDB/Walk_005.ppm");
+					} else {
+						replacementFile = new File("Walk_005.ppm");
+					}
+					
+					// pass to second method
+					MotionUtilities.removeMovingObjects_V2(targetFile, referenceFile, replacementFile);
 					break;
 				default:
 				return;
@@ -340,7 +381,7 @@ public class CS451_Cross {
 		System.out.println("");
 		System.out.println("Please enter the task number [1-4]:");
 
-		return readInputInteger();
+		return InOutUtilities.readInputInteger();
 	}
 
 	public static int get_H1_MenuInput() {
@@ -355,9 +396,10 @@ public class CS451_Cross {
 		System.out.println("");
 		System.out.println("Please enter the task number [1-5]:");
 
-		return readInputInteger();
+		return InOutUtilities.readInputInteger();
 	}
 
+	// H1 sub-menu
 	public static int getBilevelVersionselection() {
 		System.out.println("");
 		System.out.println("----- select method of bi-level conversion -----");
@@ -366,7 +408,7 @@ public class CS451_Cross {
 		System.out.println("");
 		System.out.println("Please enter the selection number [1-2]:");
 
-		return readInputInteger();
+		return InOutUtilities.readInputInteger();
 	}
 
 	public static int get_H2_MenuInput() {
@@ -378,132 +420,30 @@ public class CS451_Cross {
 		System.out.println("");
 		System.out.println("Please enter the task number [1-3]:");
 
-		return readInputInteger();
+		return InOutUtilities.readInputInteger();
 	}
-
+	
+	// H2 sub-menu 1
 	public static void getInput_N_M_K(int val[]) {
 		System.out.println("");
 		System.out.println("please enter N (space between rings)");
-		val[0] = readInputInteger();	
+		val[0] = InOutUtilities.readInputInteger();	
 		System.out.println("please enter M (thickness of rings)");
-		val[1] = readInputInteger();
+		val[1] = InOutUtilities.readInputInteger();
 		System.out.println("Please enter K such that 1 <= K <= 16 (factor to resize image - must be power of 2");
-		val[2] = readInputInteger();
+		val[2] = InOutUtilities.readInputInteger();
 	}
 	
+	// H2 sub-menu 2
 	public static int getDictionarySize(){
 		System.out.println("");
 		System.out.println("please enter the max size of dictionary to use");
-		return readInputInteger();	
+		return InOutUtilities.readInputInteger();	
 	}
 	
 	public static void get_H3_MenuInput() {
 		// Intentionally blank
 	}
-	
-	public static File getUserFileSelection() {
-		File file = new File("");
-	
-		System.out.println("");
-		System.out.println("----- please select the method for file entry -----");
-
-		while(!file.isFile()){
-			System.out.println("1. input file name directly");
-			System.out.println("2. use java file chooser GUI");
-			System.out.println("3. return to main menu");
-			
-			int select = readInputInteger();
-			
-			switch (select) {
-			case 0:
-				break;
-			case 1:
-				System.out.println("** Please enter name of file to encode **");
-				try {
-					InputStreamReader inreader = new InputStreamReader(System.in);
-					BufferedReader inName = new BufferedReader(inreader);
-					file = new File(inName.readLine());
-				} catch (IOException err) {
-					System.out.println("error reading line in file name input");
-				}
-				break;
-			case 2:
-				JFileChooser fc = new JFileChooser();
-				System.out.println("Use file chooser dialog box to select input file.\n(dialog box may be hidden behind IDE when first run)");
-				File currentDir = new File(System.getProperty("user.dir"));
-				fc.setCurrentDirectory(currentDir);
-				int returnVal = fc.showOpenDialog(null);
-				 if (returnVal == JFileChooser.APPROVE_OPTION) {
-		             file = fc.getSelectedFile();
-		             System.out.println("Opening: " + file.getAbsolutePath());
-		         } else {
-		        	 System.out.println("Open command cancelled by user.");
-		         }
-				break;
-			case 3:
-				return new File("");
-			}//end of file select switch
-			if(!file.isFile()){
-				System.out.println("can not find that file, please try again");
-			}		
-		}//while not file exists
-		return file;
-	}
-	
-	public static String readFileInput(File file){
-		String everything = "";		
-		if(file.isFile()){
-			try {
-				BufferedReader br = new BufferedReader(new FileReader(file));
-				StringBuilder sb = new StringBuilder();
-				String line = br.readLine();
-	
-				while (line != null) {
-					sb.append(line);
-					sb.append("\n");
-					line = br.readLine();
-				}
-				everything = sb.toString();
-				br.close();
-	
-			} catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}
-		else {
-			System.err.println("could not find file");
-		}
-		return everything;
-	}
-	
-	public static int readInputInteger(){
-		InputStreamReader inreader = new InputStreamReader(System.in);
-		BufferedReader in = new BufferedReader(inreader);
-		String stringIn = "";
-		
-		while(!isInteger(stringIn)){	
-			try{	
-				stringIn = in.readLine();
-			} catch (IOException err) {
-				System.out.println("oops - fatal error reading line");
-				System.exit(1);
-			}
-		}
-		return Integer.parseInt(stringIn);
-	}
-
-	public static boolean isInteger(String s) {
-	    try { 
-	        Integer.parseInt(s); 
-	    } catch(NumberFormatException e) { 
-	        return false; 
-	    }	    
-	    return true;
-	}
-	
-	
-	
-
 	
 }
 
