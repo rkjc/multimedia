@@ -110,4 +110,45 @@ public class DebugUtilities {
 		output.display("comparisonDifference.ppm");
 		//output.write2PPM("comparisonDifference.ppm");
 	}
+	
+	public static void printArray(double[] F){
+		int X = F.length;
+		for(int x = 0; x < X; x++){
+			//System.out.format("%.1d", F[u][v]);
+			System.out.print(F[x] + "  ");
+			System.out.print("\t");
+		}
+		System.out.println("");
+	}
+	
+	public static void printArray(double[][] F){
+		int X = F.length;
+		int Y = F[0].length;
+		for(int y = 0; y < Y; y++){
+			for(int x = 0; x < X; x++){
+				System.out.format("%.2f\t\t", F[x][y]);
+				//System.out.print(F[x][y] + "  ");
+				//System.out.print("\t");
+			}
+			System.out.println("");
+		}	
+		System.out.println("");
+	}
+	
+	public static void printArray(double[][][] F){
+		int X = F.length;
+		int Y = F[0].length;
+			for(int m = 0; m < 3; m++){
+			for(int y = 0; y < Y; y++){
+				for(int x = 0; x < X; x++){
+					System.out.format("%.2f\t\t", F[x][y][m]);
+					//System.out.print(F[x][y][m] + "  ");
+					//System.out.print("\t\t");
+				}
+				System.out.println("");
+			}	
+			System.out.println("");
+		}
+		System.out.println("");
+	}
 }
