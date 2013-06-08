@@ -301,4 +301,14 @@ public class ImageUtilities {
 		}
 		return unPaddedImg;
 	}
+	
+	public static void fillArrayZero(double[][] arr){
+		int X = arr.length;
+		int Y = arr[0].length;
+		for(int y = 0; y < Y; y++){
+			for(int x = 0; x < X; x++){
+				arr[x][y] = 0.0;
+			}
+		}
+	}
 }

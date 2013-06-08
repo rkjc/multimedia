@@ -3,18 +3,19 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.TreeMap;
+import java.util.Vector;
 
 
 
 
 public class MotionUtilities {
 	
-	public static void motionCompensation(File targetFile, File referenceFile) {		
-		Image refImg = new Image(referenceFile.getPath());
+	public static void motionCompensation(File targetFile, File referenceFile) {			
 		Image targetImg = new Image(targetFile.getPath());
-		
+		Image refImg = new Image(referenceFile.getPath());
+				
+		double[][][] targetUnpadArray = ImageUtilities.imageRGBtoDoubleArray(targetImg);
 		double[][][] referenceUnpadArray = ImageUtilities.imageRGBtoDoubleArray(refImg);
-		double[][][] targetUnpadArray = ImageUtilities.imageRGBtoDoubleArray(targetImg);	
 		
 		double[][][] targetArray = ImageUtilities.padImageArrayMultipleOf(targetUnpadArray, 16);
 		double[][][] referenceArray = ImageUtilities.padImageArrayMultipleOf(referenceUnpadArray, 16);
@@ -25,12 +26,12 @@ public class MotionUtilities {
 		InOutUtilities.printMotionVectors(motionVectors, targetFile, referenceFile);
 	}
 	
-	public static void motionCompensationHalfPixel(File targetFile, File referenceFile) {
-		Image refImg = new Image(referenceFile.getPath());
+	public static void motionCompensationHalfPixel(File targetFile, File referenceFile) {	
 		Image targetImg = new Image(targetFile.getPath());
+		Image refImg = new Image(referenceFile.getPath());		
 		
+		double[][][] targetUnpadArray = ImageUtilities.imageRGBtoDoubleArray(targetImg);
 		double[][][] referenceUnpadArray = ImageUtilities.imageRGBtoDoubleArray(refImg);
-		double[][][] targetUnpadArray = ImageUtilities.imageRGBtoDoubleArray(targetImg);	
 		
 		double[][][] targetArray = ImageUtilities.padImageArrayMultipleOf(targetUnpadArray, 16);
 		double[][][] referenceArray = ImageUtilities.padImageArrayMultipleOf(referenceUnpadArray, 16);
@@ -41,30 +42,42 @@ public class MotionUtilities {
 		InOutUtilities.printMotionVectors(motionVectors, targetFile, referenceFile);	
 	}
 	
-	public static void removeMovingObjects_V1(File targetFile, File referenceFile) {		
+	public static void removeMovingObjects_V1(File targetFile, File referenceFile) {			
+		Image targetImg = new Image(targetFile.getPath());
 		Image refImg = new Image(referenceFile.getPath());
-		Image targetImg = new Image(targetFile.getPath());	
-		
-		double[][][] referenceArray = ImageUtilities.imageRGBtoDoubleArray(refImg);
+			
 		double[][][] targetArray = ImageUtilities.imageRGBtoDoubleArray(targetImg);	
+		double[][][] referenceArray = ImageUtilities.imageRGBtoDoubleArray(refImg);
 		
 		double[][][] clearImageArray = removeObjectMethod_1(targetArray, referenceArray);
 		
-		ImageUtilities.arrayToImg(clearImageArray).display("ClearFrame-method_1");	
+		ImageUtilities.arrayToImg(clearImageArray).display("method_1-ClearFrame");	
 	}
 	
 	public static void removeMovingObjects_V2(File targetFile, File referenceFile, File replacementFile) {		
-		Image refImg = new Image(referenceFile.getPath());
 		Image targetImg = new Image(targetFile.getPath());
+		Image refImg = new Image(referenceFile.getPath());
 		Image replaceImg = new Image(replacementFile.getPath());
 		
-		double[][][] referenceArray = ImageUtilities.imageRGBtoDoubleArray(refImg);
 		double[][][] targetArray = ImageUtilities.imageRGBtoDoubleArray(targetImg);	
+		double[][][] referenceArray = ImageUtilities.imageRGBtoDoubleArray(refImg);
 		double[][][] replacementArray = ImageUtilities.imageRGBtoDoubleArray(replaceImg);
 		
 		double[][][] clearImageArray = removeObjectMethod_2(targetArray, referenceArray, replacementArray);
 		
-		ImageUtilities.arrayToImg(clearImageArray).display("ClearFrame-method_2");		
+		ImageUtilities.arrayToImg(clearImageArray).display("method_2-ClearFrame");		
+	}
+	
+	public static void removeMovingObjects_V3(File targetFile, File referenceFile) {			
+		Image targetImg = new Image(targetFile.getPath());
+		Image refImg = new Image(referenceFile.getPath());
+			
+		double[][][] targetArray = ImageUtilities.imageRGBtoDoubleArray(targetImg);	
+		double[][][] referenceArray = ImageUtilities.imageRGBtoDoubleArray(refImg);
+		
+		double[][][] clearImageArray = removeObjectMethod_3(targetArray, referenceArray);
+		
+		ImageUtilities.arrayToImg(clearImageArray).display("method_3-ClearFrame");	
 	}
 	
 		
@@ -314,62 +327,75 @@ public class MotionUtilities {
 		return halfPixelGreyRefArray;
 	}
 	
-
 	public static double[][][] removeObjectMethod_1(double[][][] targetArray, double[][][] referenceArray) {
 		int size_X = targetArray.length;
 		int size_Y = targetArray[0].length;	
 		int macroBlocks_X = size_X / 16;
 		int macroBlocks_Y = size_Y / 16;
-					
+		
 		double[][] greyRefArray = ImageUtilities.convertTo8bitGrayArray(referenceArray);
 		double[][] greyTargetArray = ImageUtilities.convertTo8bitGrayArray(targetArray);	
-	
+		
 		Pair[][] motionVectors = getMotionVectors(targetArray, referenceArray, false);
 		
-		//TreeMap<Double, Pair> bestMatch = new TreeMap<Double, Pair>();	
+		//TreeMap<Double, Pair> bestMatch = new TreeMap<Double, Pair>();
 		Match bestMatch;
 		
-		Pair[][] replaceBlockLoc = new Pair[macroBlocks_X][macroBlocks_Y];		
+		Pair[][] replaceBlockLoc = new Pair[macroBlocks_X][macroBlocks_Y];
+		
 		// Step through motionVector list
 		for(int Ty = 0; Ty < macroBlocks_Y; Ty++){	// Scan through Macro-Block target indexes
 			for(int Tx = 0; Tx < macroBlocks_X; Tx++){
 				int targetLocX = Tx * 16;
 				int targetLocY = Ty * 16;
 				
-				// Initialize the location holder for the closest frame with a MVC value of 1000 and Location of (0, 0)
+				//bestMatch = new TreeMap<Double, Pair>();
 				bestMatch = new Match();
 				
-				// For Target macroBlocks where motion vector != (0,0) (Dynamic block)
+				// For Target macroBlocks where motion vector != (0,0)
+				boolean isDynamic = false;
 				if(motionVectors[Tx][Ty].getX() != 0 || motionVectors[Tx][Ty].getY() != 0){
-					
-					// Scan through surrounding Reference macroBlocks				
-					for(int m = -1; m < 3; m++){
-						for(int n = -1; n < 3; n++){
+					isDynamic = true;
+				
+					// Scan through surrounding Reference macroBlocks
+					boolean existsReferenceFrame = false;
+					for(int Rx = -1; Rx < 2; Rx++){
+						for(int Ry = -1; Ry < 2; Ry++){
 							// If Reference macroBlock exists and is static, calculate MSD value
-							if(Tx + m >= 0 && Tx + m < macroBlocks_X 
-									&& Ty + n >= 0 && Ty + n < macroBlocks_Y 
-									&& motionVectors[Tx + m][Ty + n].getX() == 0 
-									&& motionVectors[Tx + m][Ty + n].getY() == 0){
-								
-									double pixelDiff = 0;
-									for(int By = 0; By < 16; By++){ //Block compare
-										for(int Bx = 0; Bx < 16; Bx++){
-											int refLocX = (Tx + m) * 16;
-											int refLocY = (Ty + n) * 16;
-												pixelDiff += Math.pow(greyRefArray[Bx + refLocX][By + refLocY] - greyTargetArray[Bx + targetLocX][By + targetLocY], 2);							
-										}	
-									} // End block compare
-									pixelDiff = pixelDiff * (1.0 / (16.0 * 16.0));
-									bestMatch.putIfSmaller(pixelDiff, new Pair(m, n));
+							if(Tx + Rx >= 0 && Tx + Rx < macroBlocks_X
+									&& Ty + Ry >= 0 && Ty + Ry < macroBlocks_Y
+									&& motionVectors[Tx + Rx][Ty + Ry].getX() == 0
+									&& motionVectors[Tx + Rx][Ty + Ry].getY() == 0) {
+								existsReferenceFrame = true;
+							
+								double pixelDiff = 0;
+								for(int By = 0; By < 16; By++){ //Block compare
+									for(int Bx = 0; Bx < 16; Bx++){
+										int refLocX = (Tx + Rx) * 16;
+										int refLocY = (Ty + Ry) * 16;
+										pixelDiff += Math.pow(greyRefArray[Bx + refLocX][By + refLocY] - greyTargetArray[Bx + targetLocX][By + targetLocY], 2);	
+									}	
+								} // End block compare
+								pixelDiff = pixelDiff * (1.0 / (16.0 * 16.0));
+								//bestMatch.put(pixelDiff, new Pair(Rx, Ry));
+								bestMatch.putIfSmaller(pixelDiff, new Pair(Rx, Ry));
 							}	
 						}
-					} // End of 16x16 Block scan 
-				} // End of checking for Dynamic TargetBlock
+					} // End of 16x16 Block scan
+					
+					if(existsReferenceFrame){
+						replaceBlockLoc[Tx][Ty] = bestMatch.getCoord();	
+					} else {
+						replaceBlockLoc[Tx][Ty] = new Pair(0, 0);	
+					}
+				}
 				
-				replaceBlockLoc[Tx][Ty] = bestMatch.getCoord();
+				if(!isDynamic){
+					replaceBlockLoc[Tx][Ty] = new Pair(0,0);
+				}
 			}
 		}
-		
+
 		// Construct new color image using replaceVector info and color referenceArray
 		double[][][] colorStillFrame = new double[size_X][size_Y][3];	
 		for(int Ty = 0; Ty < macroBlocks_Y; Ty++){	// Scan through Macro-Block target indexes
@@ -387,12 +413,14 @@ public class MotionUtilities {
 						colorStillFrame[targetLocX + Bx][targetLocY + By][1] = referenceArray[refLocX + Bx][refLocY + By][1];
 						colorStillFrame[targetLocX + Bx][targetLocY + By][2] = referenceArray[refLocX + Bx][refLocY + By][2];
 					}
-				}			
+				}	
 			}
-		}	
+		}
+
 		// Return RGB Image Array
 		return colorStillFrame;
 	}
+	
 	
 	
 	public static double[][][] removeObjectMethod_2(double[][][] targetArray, double[][][] referenceArray, double[][][] replacementArray) {			
@@ -432,4 +460,128 @@ public class MotionUtilities {
 		return colorStillFrame;		
 	}
 	
+	public static double[][][] removeObjectMethod_3(double[][][] targetArray, double[][][] referenceArray) {
+		int size_X = targetArray.length;
+		int size_Y = targetArray[0].length;	
+		int macroBlocks_X = size_X / 16;
+		int macroBlocks_Y = size_Y / 16;
+		
+		double[][] greyRefArray = ImageUtilities.convertTo8bitGrayArray(referenceArray);
+		
+		Pair[][] motionVectors = getMotionVectors(targetArray, referenceArray, false);
+		
+		//TreeMap<Double, Pair> bestMatch = new TreeMap<Double, Pair>();
+		Match bestMatch;
+		
+		Pair[][] replaceBlockLoc = new Pair[macroBlocks_X][macroBlocks_Y];
+		
+		// Step through motionVector list
+		for(int Ty = 0; Ty < macroBlocks_Y; Ty++){	// Scan through Macro-Block target indexes
+			for(int Tx = 0; Tx < macroBlocks_X; Tx++){
+				int targetLocX = Tx * 16;
+				int targetLocY = Ty * 16;
+				
+				//bestMatch = new TreeMap<Double, Pair>();
+				bestMatch = new Match();
+				
+				// For Target macroBlocks where motion vector != (0,0)
+				boolean isDynamic = false;
+				if(motionVectors[Tx][Ty].getX() != 0 || motionVectors[Tx][Ty].getY() != 0){
+					isDynamic = true;
+					System.out.println("Dynamic frame at " + Tx + " " + Ty);
+				
+					Vector <Pair> refBlocksOffset = new Vector<Pair>();
+					
+					// Scan through surrounding Reference macroBlocks and save offset of qualifying blocks
+					boolean existsReferenceFrame = false;
+					for(int Rx = -1; Rx < 2; Rx++){
+						for(int Ry = -1; Ry < 2; Ry++){
+							// If Reference macroBlock exists and is static, calculate MSD value
+							if(Tx + Rx >= 0 && Tx + Rx < macroBlocks_X
+									&& Ty + Ry >= 0 && Ty + Ry < macroBlocks_Y
+									&& motionVectors[Tx + Rx][Ty + Ry].getX() == 0
+									&& motionVectors[Tx + Rx][Ty + Ry].getY() == 0) {
+								
+								existsReferenceFrame = true;
+								refBlocksOffset.add(new Pair(Rx, Ry));
+							}
+						}
+					}
+					
+					// Scan the Reference blocks again and do a MSD with the AverageBlock
+					// Pick the closest
+							
+					if(existsReferenceFrame){
+						
+						// Build an AverageBlock 16x16 Block from the qualified images
+						double[][] averageBlock = new double[16][16];
+						ImageUtilities.fillArrayZero(averageBlock);
+						for(Pair blockOffset : refBlocksOffset) {
+							for(int By = 0; By < 16; By++){ 
+								for(int Bx = 0; Bx < 16; Bx++){
+									int refLocX = (Tx + blockOffset.getX()) * 16;
+									int refLocY = (Ty + blockOffset.getY()) * 16;
+									averageBlock[Bx][By] += greyRefArray[refLocX + Bx][refLocY + By];
+								}
+							}
+							for(int Ay = 0; Ay < 16; Ay++){ // Block Average
+								for(int Ax = 0; Ax < 16; Ax++){
+									averageBlock[Ax][Ay] = averageBlock[Ax][Ay] / refBlocksOffset.size();
+								}
+							}			
+						}
+						
+						// Find closest macroBlock based on MSD with AverageBlock
+						double pixelDiff = 0;
+						for(Pair blockDiffOffset : refBlocksOffset) {
+							int refLocX = (Tx + blockDiffOffset.getX()) * 16;
+							int refLocY = (Ty + blockDiffOffset.getY()) * 16;
+							
+							for(int By = 0; By < 16; By++){ 
+								for(int Bx = 0; Bx < 16; Bx++){
+									pixelDiff += Math.pow(greyRefArray[refLocX + Bx][refLocY + By] - averageBlock[Bx][By], 2);
+								}
+							}  // End of 16x16 Block scan
+							pixelDiff = pixelDiff * (1.0 / (16.0 * 16.0));
+							bestMatch.putIfSmaller(pixelDiff, blockDiffOffset);
+						}// End block compare
+						//System.out.println("compare " + pixelDiff + " " + Rx + " " + Ry);
+						
+						replaceBlockLoc[Tx][Ty] = bestMatch.getCoord();
+					} else {				
+						replaceBlockLoc[Tx][Ty] = new Pair(0, 0);	
+					}  // End existsReferenceFrame
+				}
+				
+				if(!isDynamic){
+					replaceBlockLoc[Tx][Ty] = new Pair(0,0);
+				}
+			}
+		} // Scan through Macro-Block target indexes
+			
+		// Construct new color image using replaceVector info and color referenceArray
+		double[][][] colorStillFrame = new double[size_X][size_Y][3];	
+		for(int Ty  = 0; Ty < macroBlocks_Y; Ty++){	// Scan through Macro-Block target indexes
+			for(int Tx = 0; Tx < macroBlocks_X; Tx++){
+				int targetLocX = Tx * 16;
+				int targetLocY = Ty * 16;
+				int offsetLocX = replaceBlockLoc[Tx][Ty].getX();
+				int offsetLocY = replaceBlockLoc[Tx][Ty].getY();
+				
+				for(int By = 0; By < 16; By++){ // Scan through Block pixel locations
+					for(int Bx = 0; Bx < 16; Bx++){
+						int refLocX = (Tx + offsetLocX) * 16;
+						int refLocY = (Ty + offsetLocY) * 16;
+						colorStillFrame[targetLocX + Bx][targetLocY + By][0] = referenceArray[refLocX + Bx][refLocY + By][0];
+						colorStillFrame[targetLocX + Bx][targetLocY + By][1] = referenceArray[refLocX + Bx][refLocY + By][1];
+						colorStillFrame[targetLocX + Bx][targetLocY + By][2] = referenceArray[refLocX + Bx][refLocY + By][2];
+					}
+				}	
+			}
+		}
+
+		// Return RGB Image Array
+		return colorStillFrame;
+	}
+
 }

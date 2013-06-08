@@ -5,7 +5,7 @@ public class Match {
 	private Pair coord;
 	
 	public Match(){
-		this.val = 1000.0; // pixelDiff
+		this.val = Double.MAX_VALUE; // pixelDiff
 		this.coord = new Pair(0, 0);
 	}
 	
