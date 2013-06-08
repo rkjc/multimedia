@@ -115,7 +115,7 @@ public class MotionUtilities {
 						if(targetLocX + Rx >= 0 && targetLocX + Rx + 15 < size_X && targetLocY + Ry >= 0 && targetLocY + Ry + 15 < size_Y){
 							
 							// Calculate MSD between the Reference frame and the Target macroBlock
-							double pixelDiff = 0;
+							Double pixelDiff = 0.0;
 							for(int By = 0; By < 16; By++){ //Block compare
 								for(int Bx = 0; Bx < 16; Bx++){								
 									pixelDiff += Math.pow(greyRefArray[targetLocX + Rx + Bx][targetLocY + Ry + By] - greyTargetArray[targetLocX + Bx][targetLocY + By], 2);							
@@ -215,7 +215,7 @@ public class MotionUtilities {
 						if(halfPixelLocX + Rx >= 0 && halfPixelLocX + Rx + (15 * 2) < halfPixSize_X && halfPixelLocY + Ry >= 0 && halfPixelLocY + Ry + (15 * 2) < halfPixSize_Y){
 							
 							// Calculate MSD between the Reference frame and the Target macroBlock
-							double pixelDiff = 0;
+							Double pixelDiff = 0.0;
 							for(int By = 0; By < 16; By++){ //Block compare
 								for(int Bx = 0; Bx < 16; Bx++){		
 									pixelDiff += Math.pow(halfPixelGreyRefArray[halfPixelLocX + Rx + (Bx * 2)][halfPixelLocY + Ry + (By * 2)] - greyTargetArray[targetLocX + Bx][targetLocY + By], 2);									
@@ -368,7 +368,7 @@ public class MotionUtilities {
 									&& motionVectors[Tx + Rx][Ty + Ry].getY() == 0) {
 								existsReferenceFrame = true;
 							
-								double pixelDiff = 0;
+								Double pixelDiff = 0.0;
 								for(int By = 0; By < 16; By++){ //Block compare
 									for(int Bx = 0; Bx < 16; Bx++){
 										int refLocX = (Tx + Rx) * 16;
@@ -532,7 +532,7 @@ public class MotionUtilities {
 						}
 						
 						// Find closest macroBlock based on MSD with AverageBlock
-						double pixelDiff = 0;
+						Double pixelDiff = 0.0;
 						for(Pair blockDiffOffset : refBlocksOffset) {
 							int refLocX = (Tx + blockDiffOffset.getX()) * 16;
 							int refLocY = (Ty + blockDiffOffset.getY()) * 16;
