@@ -124,7 +124,13 @@ public class DebugUtilities {
 	public static void printArray(double[][] F){
 		int X = F.length;
 		int Y = F[0].length;
+		System.out.print("    ");
+		for(int m = 0; m < X; m++){
+			System.out.format("%.2f\t\t", (double)m);
+		}
+		System.out.println("\n");
 		for(int y = 0; y < Y; y++){
+			System.out.print(y + "    ");
 			for(int x = 0; x < X; x++){
 				System.out.format("%.2f\t\t", F[x][y]);
 				//System.out.print(F[x][y] + "  ");

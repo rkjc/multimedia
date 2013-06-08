@@ -306,10 +306,11 @@ public class CS451_Cross {
 		while (true) {
 			System.out.println("\n-----  Block-based Motion Compensation selections  -----\n");	
 			System.out.println("1. Block-Based Motion Compensation");
-			System.out.println("2. Removing Moving Objects");
-			System.out.println("3. return to previous menu");
+			System.out.println("2. Block-Based Motion Compensation - Half Pixel version");
+			System.out.println("3. Removing Moving Objects");
+			System.out.println("4. return to previous menu");
 			System.out.println("");
-			System.out.println("Please enter the task number [1-3]:");
+			System.out.println("Please enter the task number [1-4]:");
 			
 			int h3In = InOutUtilities.readInputInteger();
 
@@ -336,7 +337,29 @@ public class CS451_Cross {
 					MotionUtilities.motionCompensation(targetFile, referenceFile);	
 					break;
 					
-				case 2:	// Remove Motion elements - two methods
+				case 2:
+					// input file name or number
+					targetFile = InOutUtilities.getH4fileInput();
+					if(targetFile != null){
+						System.out.println("Using as Target file: " + targetFile.getName());
+						System.out.println("");
+					} else {
+						break;
+					}
+					
+					referenceFile = InOutUtilities.getH4fileInput();
+					if(referenceFile != null){	 
+						System.out.println("Using as Reference file: " + referenceFile.getName());
+						System.out.println("");
+					} else {
+						break;
+					}
+					
+					// pass to function
+					MotionUtilities.motionCompensationHalfPixel(targetFile, referenceFile);	
+					break;
+					
+				case 3:	// Remove Motion elements - two methods
 					// Input reference number
 					File[] targetFileA = new File[1];
 					File[] referenceFileA = new File[1];
