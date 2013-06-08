@@ -385,25 +385,9 @@ public class CS451_Cross {
 					}
 					
 					// pass to second method
-					MotionUtilities.removeMovingObjects_V2(targetFile, referenceFile, replacementFile);
-					
-					// pass to third method
-					MotionUtilities.removeMovingObjects_V3(targetFile, referenceFile);
+					MotionUtilities.removeMovingObjects_V2(targetFile, referenceFile, replacementFile);					
 					break;
-				case 4:	// Remove Motion elements - two methods
-					// Input reference number
-					File[] targetFileB = new File[1];
-					File[] referenceFileB = new File[1];
-					if(!InOutUtilities.getH4fileNumberInput(targetFileB, referenceFileB)){
-						System.out.println("Sorry, had a problem reading the files");
-						break;
-					}
-					targetFile = targetFileB[0];
-					referenceFile = referenceFileB[0];
 					
-					// pass to first method
-					MotionUtilities.removeMovingObjects_V1(targetFile, referenceFile);
-					break;
 				default:
 				return;
 			}
