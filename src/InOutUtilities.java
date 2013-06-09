@@ -84,23 +84,23 @@ public class InOutUtilities {
 			
 			if(input.length() == 3 && isInteger(input)){
 				
-				StringBuilder stringName;
+				String stringName;
 				if(atHome){
-					stringName = new StringBuilder("../data/IDB/Walk_");
+					stringName = "../data/IDB/Walk_";
 				} else if(subIDB) {
-					stringName = new StringBuilder("IDB/Walk_");
+					stringName = "IDB/Walk_";
 				} else {
-					stringName = new StringBuilder("Walk_");
+					stringName = "Walk_";
 				}
 				
 				// Get the Target File
-				StringBuilder targetName = stringName;
+				StringBuilder targetName = new StringBuilder(stringName);
 				targetName.append(input);
 				targetName.append(".ppm");
 				targetFile[0] =  new File(targetName.toString());
 				
 				// Get the Reference File
-				StringBuilder referenceName  = stringName;
+				StringBuilder referenceName = new StringBuilder(stringName);
 				 // Need to append exactly 3 characters
 				String formatted = String.format("%03d", (Integer.parseInt(input) - 2));
 				referenceName.append(formatted);						
@@ -108,8 +108,8 @@ public class InOutUtilities {
 				referenceFile[0] =  new File(referenceName.toString());
 				
 				// Get the Replacement File
-				StringBuilder replacementName = stringName;
-				replacementName.append("Walk_005.ppm");
+				StringBuilder replacementName = new StringBuilder(stringName);
+				replacementName.append("005.ppm");
 				replacementFile[0] =  new File(replacementName.toString());
 				
 				// Check that all the Files are there
