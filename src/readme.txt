@@ -28,7 +28,7 @@ After selecting [4. Homework 4] the menu will display these choices:
 	For file selection using the number method the program will retrieve a file named "Walk_xxx.ppm"
 		(replacing the xxx with the 3 digits entered)
 	
-	When using the quick number selection, the file has to be in the same folder as the program was run from.
+	When using the quick number selection, the file has to be in the same folder as the program was run from or in a subfolder named IDB.
 	
 	When it runs it will display in the console a table of motion vectors.
 	It will also write this motion vector table to a file named mv.txt.

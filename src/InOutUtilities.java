@@ -19,22 +19,30 @@ public class InOutUtilities {
 			BufferedReader inName = new BufferedReader(inreader);
 			String input = inName.readLine();
 			
-			// Check if this is running on a file system that matches my home system
+			// Check for various file structures
+			File checkFolder;
 			boolean atHome = false;
-			File checkFolder = new File("../data/IDB");
+			checkFolder = new File("../data/IDB");
 				atHome = checkFolder.exists();
+				
+			boolean subIDB = false;	
+			checkFolder = new File("IDB");
+				subIDB = checkFolder.exists();
 			
 			if(input.length() == 3 && isInteger(input)){
 				//StringBuilder fileName = new StringBuilder("Walk_");
 				StringBuilder fileName;
 				if(atHome){
 					fileName = new StringBuilder("../data/IDB/Walk_");
+				} else if(subIDB) {
+					fileName = new StringBuilder("IDB/Walk_");
 				} else {
 					fileName = new StringBuilder("Walk_");
 				}
 				fileName.append(input);
 				fileName.append(".ppm");
 				File file =  new File(fileName.toString());
+				
 				if(file.isFile()){
 					return file;
 				} else {
