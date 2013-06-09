@@ -1,15 +1,9 @@
 // Richard Cross
 // CS-451 Spring 2013
 
-
-import java.io.*;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Scanner;
 import java.io.File;
 
-import javax.swing.JFileChooser;
 
 public class CS451_Cross {
 
@@ -315,8 +309,9 @@ public class CS451_Cross {
 			int h3In = InOutUtilities.readInputInteger();
 
 			switch (h3In) { 
-				case 1:
+				case 1:			// Block-Based Motion Compensation
 					// input file name or number
+					System.out.println("Please select a Target file");
 					targetFile = InOutUtilities.getH4fileInput();
 					if(targetFile != null){
 						System.out.println("Using as Target file: " + targetFile.getName());
@@ -325,6 +320,7 @@ public class CS451_Cross {
 						break;
 					}
 					
+					System.out.println("Please select a Reference file");
 					referenceFile = InOutUtilities.getH4fileInput();
 					if(referenceFile != null){	 
 						System.out.println("Using as Reference file: " + referenceFile.getName());
@@ -337,7 +333,7 @@ public class CS451_Cross {
 					MotionUtilities.motionCompensation(targetFile, referenceFile);	
 					break;
 					
-				case 2:
+				case 2:		// Block-Based Motion Compensation - Half Pixel version
 					// input file name or number
 					targetFile = InOutUtilities.getH4fileInput();
 					if(targetFile != null){
@@ -363,27 +359,20 @@ public class CS451_Cross {
 					// Input reference number
 					File[] targetFileA = new File[1];
 					File[] referenceFileA = new File[1];
-					if(!InOutUtilities.getH4fileNumberInput(targetFileA, referenceFileA)){
+					File[] replacementFileA = new File[1]; // This is image Walk_005.ppm
+					
+					if(!InOutUtilities.getH4RemovefileInput(targetFileA, referenceFileA, replacementFileA)){
 						System.out.println("Sorry, had a problem reading the files");
 						break;
 					}
+					
 					targetFile = targetFileA[0];
 					referenceFile = referenceFileA[0];
+					File replacementFile = replacementFileA[0];
 					
 					// pass to first method
 					MotionUtilities.removeMovingObjects_V1(targetFile, referenceFile);
-					
-					// Check if this is running on a file system that matches my home system
-					boolean atHome = false;
-					File checkFolder = new File("../data/IDB");
-						atHome = checkFolder.exists();
-					File replacementFile;
-					if(atHome){
-						replacementFile = new File("../data/IDB/Walk_005.ppm");
-					} else {
-						replacementFile = new File("Walk_005.ppm");
-					}
-					
+
 					// pass to second method
 					MotionUtilities.removeMovingObjects_V2(targetFile, referenceFile, replacementFile);					
 					break;

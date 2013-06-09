@@ -1,11 +1,4 @@
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.TreeMap;
-import java.util.Vector;
-
-
 
 
 public class MotionUtilities {
@@ -38,8 +31,8 @@ public class MotionUtilities {
 		
 		Pair[][] motionVectors = getMotionVectorsHalfPixel(targetArray, referenceArray, true);
 		
-		InOutUtilities.writeMotionVectorsFile(motionVectors, targetFile, referenceFile);
-		InOutUtilities.printMotionVectors(motionVectors, targetFile, referenceFile);	
+		InOutUtilities.writeMotionVectorsFileHalfPixel(motionVectors, targetFile, referenceFile);
+		InOutUtilities.printMotionVectorsHalfPixel(motionVectors, targetFile, referenceFile);	
 	}
 	
 	public static void removeMovingObjects_V1(File targetFile, File referenceFile) {			

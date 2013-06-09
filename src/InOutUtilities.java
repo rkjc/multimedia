@@ -56,7 +56,7 @@ public class InOutUtilities {
 		return null;
 	}
 	
-	public static boolean getH4fileNumberInput(File[] targetFile, File[] referenceFile) {	
+	public static boolean getH4RemovefileInput(File[] targetFile, File[] referenceFile, File[] replacementFile) {	
 		System.out.println("\nPlease a 3 digit number between 001 and 200 for HW-4 image file \"Walk_xxx.ppm\"");
 		
 		try {
@@ -69,18 +69,19 @@ public class InOutUtilities {
 				atHome = checkFolder.exists();
 			
 			if(input.length() == 3 && isInteger(input)){
-				//StringBuilder targetName = new StringBuilder("Walk_");
+				
+				// Get the Target File
 				StringBuilder targetName;
 				if(atHome){
 					targetName = new StringBuilder("../data/IDB/Walk_");
 				} else {
 					targetName = new StringBuilder("Walk_");
 				}
-				
 				targetName.append(input);
 				targetName.append(".ppm");
 				targetFile[0] =  new File(targetName.toString());
 				
+				// Get the Reference File
 				StringBuilder referenceName;
 				if(atHome){
 					referenceName = new StringBuilder("../data/IDB/Walk_");
@@ -93,7 +94,17 @@ public class InOutUtilities {
 				referenceName.append(".ppm");
 				referenceFile[0] =  new File(referenceName.toString());
 				
-				if(targetFile[0].isFile() && referenceFile[0].isFile()){
+				// Get the Replacement File
+				StringBuilder replacementName;
+				if(atHome){
+					replacementName = new StringBuilder("../data/IDB/Walk_005.ppm");
+				} else {
+					replacementName = new StringBuilder("Walk_005.ppm");
+				}
+				replacementFile[0] =  new File(replacementName.toString());
+				
+				// Check that all the Files are there
+				if(targetFile[0].isFile() && referenceFile[0].isFile() && replacementFile[0].isFile()){
 					return true;
 				} else {
 					System.out.println("sorry, could not find at least one of those files");
@@ -160,33 +171,6 @@ public class InOutUtilities {
 	}
 	
 	
-	public static void writeMotionVectorsFile(Pair[][] motionVectors) {
-		int macroBlock_X = motionVectors.length;
-		int macroBlock_Y = motionVectors[0].length;
-		BufferedWriter writer = null;
-		try {
-			writer = new BufferedWriter( new FileWriter( "mvTest.txt"));
-			writer.newLine();
-			for(int y = 0; y < macroBlock_Y; y++){
-				for(int x = 0; x < macroBlock_X; x++){
-					writer.write("[" + String.format("%3d", (motionVectors[x][y].getX())) + ", " + String.format("%3d", (motionVectors[x][y].getY())) + "]  ");	
-				}
-				writer.newLine();
-				writer.newLine();
-			}
-		}
-		catch ( IOException e){
-		}
-		finally{
-			try{
-				if ( writer != null)
-					writer.close( );
-			}
-			catch ( IOException e){
-			}
-	    }		
-	}
-	
 	public static void writeMotionVectorsFile(Pair[][] motionVectors, File targetFile, File referenceFile) {
 		int macroBlock_X = motionVectors.length;
 		int macroBlock_Y = motionVectors[0].length;
@@ -194,6 +178,8 @@ public class InOutUtilities {
 		try {
 			writer = new BufferedWriter( new FileWriter( "mv.txt"));
 			writer.write("# Name: Richard Cross");
+			writer.newLine();
+			writer.write("# Motion Vectors");
 			writer.newLine();
 			writer.write("# Target image name: " + targetFile.getName());
 			writer.newLine();
@@ -220,11 +206,52 @@ public class InOutUtilities {
 			catch ( IOException e){
 			}
 	    }		
-		writeMotionVectorsFile(motionVectors);
+	}
+	
+	public static void writeMotionVectorsFileHalfPixel(Pair[][] motionVectors, File targetFile, File referenceFile) {
+		int macroBlock_X = motionVectors.length;
+		int macroBlock_Y = motionVectors[0].length;
+		BufferedWriter writer = null;
+		try {
+			writer = new BufferedWriter( new FileWriter( "mv.txt"));
+			writer.write("# Name: Richard Cross");
+			writer.newLine();
+			writer.write("# Motion Vectors - Half Pixel Method");
+			writer.newLine();
+			writer.write("# Target image name: " + targetFile.getName());
+			writer.newLine();
+			writer.write("# Reference image name: " + referenceFile.getName());
+			writer.newLine();
+			writer.write("# Number of target macro blocks: " + macroBlock_X + " x " + macroBlock_Y + " (image size is " + macroBlock_X*16 + " x " + macroBlock_Y*16 + ")");
+			writer.newLine();
+			writer.newLine();
+			for(int y = 0; y < macroBlock_Y; y++){
+				for(int x = 0; x < macroBlock_X; x++){
+					writer.write("[" + String.format("%5.1f", (((double)motionVectors[x][y].getX()) / 2.0)) + ", " + String.format("%5.1f", (((double)motionVectors[x][y].getY()) / 2.0)) + "]  ");	
+				}
+				writer.newLine();
+				writer.newLine();
+			}
+		}
+		catch ( IOException e){
+		}
+		finally{
+			try{
+				if ( writer != null)
+					writer.close( );
+			}
+			catch ( IOException e){
+			}
+	    }		
 	}
 	
 	
 	public static void printMotionVectors(Pair[][] motionVectors, File targetFile, File referenceFile) {
+		printMotionVectorsHeader(motionVectors, targetFile, referenceFile);
+		printMotionVectors(motionVectors);
+	}
+	
+	public static void printMotionVectorsHeader(Pair[][] motionVectors, File targetFile, File referenceFile) {
 		int macroBlock_X = motionVectors.length;
 		int macroBlock_Y = motionVectors[0].length;
 		
@@ -233,8 +260,7 @@ public class InOutUtilities {
 			System.out.println("# Target image name: " + targetFile.getName());
 			System.out.println("# Reference image name: " + referenceFile.getName());
 			System.out.println("# Number of target macro blocks: " + macroBlock_X + " x " + macroBlock_Y + " (image size is " + macroBlock_X*16 + " x " + macroBlock_Y*16 + ")");
-			System.out.println("");
-			printMotionVectors(motionVectors);
+			System.out.println("");		
 	}
 			
 	public static void printMotionVectors(Pair[][] motionVectors){	
@@ -246,6 +272,11 @@ public class InOutUtilities {
 			}
 			System.out.println("");
 		}
+	}
+	
+	public static void printMotionVectorsHalfPixel(Pair[][] motionVectors, File targetFile, File referenceFile) {
+		printMotionVectorsHeader(motionVectors, targetFile, referenceFile);
+		printMotionVectorsHalfPixel(motionVectors);
 	}
 	
 	public static void printMotionVectorsHalfPixel(Pair[][] motionVectors){	
