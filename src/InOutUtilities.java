@@ -71,31 +71,36 @@ public class InOutUtilities {
 			InputStreamReader inreader = new InputStreamReader(System.in);
 			BufferedReader inName = new BufferedReader(inreader);
 			String input = inName.readLine();
-			// Check if this is running on a file system that matches my home system
+
+			// Check for various file structures
+			File checkFolder;
 			boolean atHome = false;
-			File checkFolder = new File("../data/IDB");
+			checkFolder = new File("../data/IDB");
 				atHome = checkFolder.exists();
+				
+			boolean subIDB = false;	
+			checkFolder = new File("IDB");
+				subIDB = checkFolder.exists();
 			
 			if(input.length() == 3 && isInteger(input)){
 				
-				// Get the Target File
-				StringBuilder targetName;
+				StringBuilder stringName;
 				if(atHome){
-					targetName = new StringBuilder("../data/IDB/Walk_");
+					stringName = new StringBuilder("../data/IDB/Walk_");
+				} else if(subIDB) {
+					stringName = new StringBuilder("IDB/Walk_");
 				} else {
-					targetName = new StringBuilder("Walk_");
+					stringName = new StringBuilder("Walk_");
 				}
+				
+				// Get the Target File
+				StringBuilder targetName = stringName;
 				targetName.append(input);
 				targetName.append(".ppm");
 				targetFile[0] =  new File(targetName.toString());
 				
 				// Get the Reference File
-				StringBuilder referenceName;
-				if(atHome){
-					referenceName = new StringBuilder("../data/IDB/Walk_");
-				} else {
-					referenceName = new StringBuilder("Walk_");
-				}
+				StringBuilder referenceName  = stringName;
 				 // Need to append exactly 3 characters
 				String formatted = String.format("%03d", (Integer.parseInt(input) - 2));
 				referenceName.append(formatted);						
@@ -103,12 +108,8 @@ public class InOutUtilities {
 				referenceFile[0] =  new File(referenceName.toString());
 				
 				// Get the Replacement File
-				StringBuilder replacementName;
-				if(atHome){
-					replacementName = new StringBuilder("../data/IDB/Walk_005.ppm");
-				} else {
-					replacementName = new StringBuilder("Walk_005.ppm");
-				}
+				StringBuilder replacementName = stringName;
+				replacementName.append("Walk_005.ppm");
 				replacementFile[0] =  new File(replacementName.toString());
 				
 				// Check that all the Files are there
