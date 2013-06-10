@@ -71,13 +71,29 @@ After selecting [4. Homework 4] the menu will display these choices:
 
 
 Notes:
+
 I noticed some odd behavior in the Block-Based Motion Compensation methods, but it is much more obvious in the Half-Pixel method.
 For example, using frame 050 as Target and 048 as Reference produces Half-Pixel Dynamic frames along the right hand edge of the motion vector table.
 Not sure if this is an artifact of the program code (meaning a mistake I may have made), or a change induced by varing light levels.
 In full pixel mode there is still one Dynamic block on the right hand edge.
 
+-----
+
 In both of the Block-Based Motion Compensation methods the error frame shows a difference between the images on the left-hand side about 1/3 of the way up from the bottom.
 It is interesting that this difference does not seem to get detected as a motion. It may get detected in a frame I have not tested yet.
 
+-----
+
 I used a different definition of "close" on the Remove Moving Object method one than what was apparently used for the example result given.
 The example looks like it just scanned by position starting top left and used the first Static block it found.
+
+-----
+
+The sign of the Motion Vector is something I am unsure of.
+Initially I had it as d =  (Target Position) - (Candidate Position).
+Later, going through the lecture slides, I reexamined the supplemental "Lecture 10 - Calculating the Best Matching Block".
+On page 7 it shows an example where the Motion Vector is calculated as d = (Candidate Position) - (Target Position).
+Because of this I changed my program to produce similar output.
+
+It is interesting to note that a search of the internet did not bring up a definitive answer to this question. There are quite a few references that mention that the motion vector represents the difference between the two images, but nothing that clearly indicates which position is to be subtracted from the other.
+
