@@ -12,26 +12,28 @@ public class TestMain extends CS451_Cross {
 	 */
 	public static void main(String[] args) {
 		
+		homework4part1a();
+		
 //		double numb = 34.789;
 //		System.out.println("X" + String.format("%5.1f", numb));
 		
 		
 //		double[][][] targetArray = new double[1][1][1];
 //		double[][][] referenceArray = new double[1][1][1];
-		
-		File targetFile = new File("../data/IDB/Walk_058.ppm");
-		File refFile = new File("../data/IDB/Walk_056.ppm");
-		
-		Image targetImg = new Image(targetFile.getPath());	
-		Image refImg = new Image(refFile.getPath());
-		
-		double[][][] targetArray = ImageUtilities.imageRGBtoDoubleArray(targetImg);
-		double[][][] referenceArray = ImageUtilities.imageRGBtoDoubleArray(refImg);
-			
-		Pair[][] motionVectors = getMotionVectorsHalfPixel(targetArray, referenceArray, true);
-		
-		//InOutUtilities.writeMotionVectorsFile(motionVectors);
-		InOutUtilities.printMotionVectorsHalfPixel(motionVectors);
+//		
+//		File targetFile = new File("../data/IDB/Walk_058.ppm");
+//		File refFile = new File("../data/IDB/Walk_056.ppm");
+//		
+//		Image targetImg = new Image(targetFile.getPath());	
+//		Image refImg = new Image(refFile.getPath());
+//		
+//		double[][][] targetArray = ImageUtilities.imageRGBtoDoubleArray(targetImg);
+//		double[][][] referenceArray = ImageUtilities.imageRGBtoDoubleArray(refImg);
+//			
+//		Pair[][] motionVectors = getMotionVectorsHalfPixel(targetArray, referenceArray, true);
+//		
+//		//InOutUtilities.writeMotionVectorsFile(motionVectors);
+//		InOutUtilities.printMotionVectorsHalfPixel(motionVectors);
 		
 	}
 	
@@ -215,23 +217,23 @@ public class TestMain extends CS451_Cross {
 	
 	
 	
-//	public static void homework4part1a() {
+	public static void homework4part1a() {
 		
 		// This will be copy/pastad into MotionUtility method 1ec half-pixel
 		
 		// Start Test zone @@@@@@@@@@@@@@@@@@
 		
-//		int size_X = 32;
-//		int size_Y = 32;
-//		
-//		int macroBlocks_X = 2;
-//		int macroBlocks_Y = 2;
-//	
-//		double[][] greyRefArray = make32x32Array1();
-//		double[][] greyTargetArray = make32x32Array2();
-//		
-//		ImageUtilities.arrayToGreyImgDisplay(greyRefArray, "greyRefArray");
-//		ImageUtilities.arrayToGreyImgDisplay(greyTargetArray, "greyTargetArray");
+		int size_X = 32;
+		int size_Y = 32;
+		
+		int macroBlocks_X = 2;
+		int macroBlocks_Y = 2;
+	
+		double[][] greyRefArray = make32x32Array1();
+		double[][] greyTargetArray = make32x32Array2();
+		
+		ImageUtilities.arrayToGreyImgDisplay(greyRefArray, "greyRefArray");
+		ImageUtilities.arrayToGreyImgDisplay(greyTargetArray, "greyTargetArray");
 		
 		// Pivot Test zone @@@@@@@@@@@@@@@@@@
 		
@@ -252,106 +254,107 @@ public class TestMain extends CS451_Cross {
 //		
 //		double[][] greyRefArray = ImageUtilities.convertTo8bitGrayArray(refArray);
 //		double[][] greyTargetArray = ImageUtilities.convertTo8bitGrayArray(targetArray);
-//		
-//		// End Test zone @@@@@@@@@@@@@@@@@@
-//		
-//		double[][] errorFrame = new double[size_X][size_Y];
-//		
-//	
-//		//refImg.display(refFile.getName());
-//		//targetImg.display(targetFile.getName());
-//		
-//		
-//		
-//		Pair[][] motionVectors = new Pair[macroBlocks_X][macroBlocks_Y];
-//		
-//		
-//		TreeMap<Double, Pair> bestMatch = new TreeMap<Double, Pair>();
-//		
-//		// Tx, Ty for target block locations {used to calculate top left corner} (12 x 9 for homework 4 images)
-//		// Rx, Ry for reference block locations {used to calculate top left corner} (25 x 25 -> for p=12)
-//		// Bx, By block pixel location values (16 x 16)
-//		
-//		for(int Ty = 0; Ty < macroBlocks_Y; Ty++){
-//			for(int Tx = 0; Tx < macroBlocks_X; Tx++){
-//				int targetLocX = Tx * 16;
-//				int targetLocY = Ty * 16;
-//				
-//				bestMatch = new TreeMap<Double, Pair>();
-//				for(int Ry = -12; Ry < 13; Ry++){
-//					for(int Rx = -12; Rx < 13; Rx++){	
-//
-//						if(targetLocX + Rx >= 0 && targetLocX + Rx + 15 < size_X && targetLocY + Ry >= 0 && targetLocY + Ry + 15 < size_Y){
-//							
-//							double pixelDiff = 0;
-//							for(int By = 0; By < 16; By++){ //Block compare
-//								for(int Bx = 0; Bx < 16; Bx++){
-//									
-//										pixelDiff += Math.pow(greyRefArray[Bx + targetLocX + Rx][By + targetLocY + Ry] - greyTargetArray[Bx + targetLocX][By + targetLocY], 2);							
-//								}	
-//							} // End block compare
-//							pixelDiff = pixelDiff * (1.0 / (16.0 * 16.0));
-//							
-//							// Test for bestMatch being empty
-//							if(bestMatch.isEmpty()){bestMatch.put(pixelDiff, new Pair(-Rx, -Ry));
-//							}else {
-//								// If new entry matches the lowest value, save key Pair that is closest to (0, 0)
-//								if(pixelDiff == bestMatch.firstEntry().getKey()){
-//									double dist1 = Math.sqrt(Math.pow(bestMatch.firstEntry().getValue().getX(), 2) + Math.pow(bestMatch.firstEntry().getValue().getY(), 2));
-//									double dist2 = Math.sqrt(Math.pow(Rx, 2) + Math.pow(Ry, 2));
-//									if(dist2 < dist1){
-//										bestMatch.put(pixelDiff, new Pair(-Rx, -Ry));
-//									}  // If dist2 is greater then leave it there, don't replace it
-//								} else {
-//									bestMatch.put(pixelDiff, new Pair(-Rx, -Ry));
-//								}
-//							}
-//							
-//						}
-//					}
-//				} // End reference block scans [Rx, Ry]
-//
-//				motionVectors[Tx][Ty] = bestMatch.firstEntry().getValue();
-//			}
-//		} // End MacroBlock scan [Tx, Ty]
-//		
-//		// Generating error frame
-//		for(int Ty = 0; Ty < macroBlocks_Y; Ty++){	// Scan through Macro-Block indexes
-//			for(int Tx = 0; Tx < macroBlocks_X; Tx++){
-//				int targetLocX = Tx * 16;
-//				int targetLocY = Ty * 16;
-//				int refLocX = motionVectors[Tx][Ty].getX();
-//				int refLocY = motionVectors[Tx][Ty].getY();
-//				
-//				for(int By = 0; By < 16; By++){ // Scan through Block pixel locations
-//					for(int Bx = 0; Bx < 16; Bx++){
-//						
-//						double errorPixel = greyTargetArray[targetLocX + Bx][targetLocY + By] - greyRefArray[targetLocX + Bx - refLocX][targetLocY + By - refLocY];
-//						errorFrame[targetLocX + Bx][targetLocY + By] = errorPixel;
-//					}
-//				}
-//			}
-//		}
-//		
-//		// Re-scale error frame 
-//		double minVal = 512;
-//		double maxVal = -512;
-//		for(int y = 0; y < size_Y; y++){
-//			for(int x = 0; x < size_X; x++){		
-//				if(errorFrame[x][y] < minVal) { minVal = errorFrame[x][y];}
-//				if(errorFrame[x][y] > maxVal) { maxVal = errorFrame[x][y];}
-//			}
-//		}
-//		double range = maxVal - minVal;
-//		double scale = 255.0 / range;
-//		// Shift values, scale, then round, then box, and re-save the errorFrame pixel values
-//		for(int y = 0; y < size_Y; y++){
-//			for(int x = 0; x < size_X; x++){		
-//				errorFrame[x][y] = Math.max(Math.min(Math.round((errorFrame[x][y] - minVal) * scale), 255.0), 0.0);
-//			}
-//		}
-//		
-//		ImageUtilities.arrayToGreyImgDisplay(errorFrame, "error frame");
+		
+		// End Test zone @@@@@@@@@@@@@@@@@@
+		
+		double[][] errorFrame = new double[size_X][size_Y];
+		
+	
+		//refImg.display(refFile.getName());
+		//targetImg.display(targetFile.getName());
+		
+		
+		
+		Pair[][] motionVectors = new Pair[macroBlocks_X][macroBlocks_Y];
+		
+		
+		TreeMap<Double, Pair> bestMatch = new TreeMap<Double, Pair>();
+		
+		// Tx, Ty for target block locations {used to calculate top left corner} (12 x 9 for homework 4 images)
+		// Rx, Ry for reference block locations {used to calculate top left corner} (25 x 25 -> for p=12)
+		// Bx, By block pixel location values (16 x 16)
+		
+		for(int Ty = 0; Ty < macroBlocks_Y; Ty++){
+			for(int Tx = 0; Tx < macroBlocks_X; Tx++){
+				int targetLocX = Tx * 16;
+				int targetLocY = Ty * 16;
+				
+				bestMatch = new TreeMap<Double, Pair>();
+				for(int Ry = -12; Ry < 13; Ry++){
+					for(int Rx = -12; Rx < 13; Rx++){	
+
+						if(targetLocX + Rx >= 0 && targetLocX + Rx + 15 < size_X && targetLocY + Ry >= 0 && targetLocY + Ry + 15 < size_Y){
+							
+							double pixelDiff = 0;
+							for(int By = 0; By < 16; By++){ //Block compare
+								for(int Bx = 0; Bx < 16; Bx++){
+									
+										pixelDiff += Math.pow(greyRefArray[Bx + targetLocX + Rx][By + targetLocY + Ry] - greyTargetArray[Bx + targetLocX][By + targetLocY], 2);							
+								}	
+							} // End block compare
+							pixelDiff = pixelDiff * (1.0 / (16.0 * 16.0));
+							
+							// Test for bestMatch being empty
+							if(bestMatch.isEmpty()){bestMatch.put(pixelDiff, new Pair(-Rx, -Ry));
+							}else {
+								// If new entry matches the lowest value, save key Pair that is closest to (0, 0)
+								if(pixelDiff == bestMatch.firstEntry().getKey()){
+									double dist1 = Math.sqrt(Math.pow(bestMatch.firstEntry().getValue().getX(), 2) + Math.pow(bestMatch.firstEntry().getValue().getY(), 2));
+									double dist2 = Math.sqrt(Math.pow(Rx, 2) + Math.pow(Ry, 2));
+									if(dist2 < dist1){
+										bestMatch.put(pixelDiff, new Pair(-Rx, -Ry));
+									}  // If dist2 is greater then leave it there, don't replace it
+								} else {
+									bestMatch.put(pixelDiff, new Pair(-Rx, -Ry));
+								}
+							}
+							
+						}
+					}
+				} // End reference block scans [Rx, Ry]
+
+				motionVectors[Tx][Ty] = bestMatch.firstEntry().getValue();
+			}
+		} // End MacroBlock scan [Tx, Ty]
+		
+		// Generating error frame
+		for(int Ty = 0; Ty < macroBlocks_Y; Ty++){	// Scan through Macro-Block indexes
+			for(int Tx = 0; Tx < macroBlocks_X; Tx++){
+				int targetLocX = Tx * 16;
+				int targetLocY = Ty * 16;
+				int refLocX = motionVectors[Tx][Ty].getX();
+				int refLocY = motionVectors[Tx][Ty].getY();
+				
+				for(int By = 0; By < 16; By++){ // Scan through Block pixel locations
+					for(int Bx = 0; Bx < 16; Bx++){
+						
+						double errorPixel = greyTargetArray[targetLocX + Bx][targetLocY + By] - greyRefArray[targetLocX + Bx - refLocX][targetLocY + By - refLocY];
+						errorFrame[targetLocX + Bx][targetLocY + By] = errorPixel;
+					}
+				}
+			}
+		}
+		
+		// Re-scale error frame 
+		double minVal = 512;
+		double maxVal = -512;
+		for(int y = 0; y < size_Y; y++){
+			for(int x = 0; x < size_X; x++){		
+				if(errorFrame[x][y] < minVal) { minVal = errorFrame[x][y];}
+				if(errorFrame[x][y] > maxVal) { maxVal = errorFrame[x][y];}
+			}
+		}
+		double range = maxVal - minVal;
+		double scale = 255.0 / range;
+		// Shift values, scale, then round, then box, and re-save the errorFrame pixel values
+		for(int y = 0; y < size_Y; y++){
+			for(int x = 0; x < size_X; x++){		
+				errorFrame[x][y] = Math.max(Math.min(Math.round((errorFrame[x][y] - minVal) * scale), 255.0), 0.0);
+			}
+		}
+		
+		ImageUtilities.arrayToGreyImgDisplay(errorFrame, "error frame");
+		InOutUtilities.printMotionVectors(motionVectors);
 //		InOutUtilities.writeMotionVectorsFile(motionVectors, targetFile, refFile);
 		
 		
@@ -435,7 +438,7 @@ public class TestMain extends CS451_Cross {
 //		
 //		// Display image
 //		
-//	}
+	}
 	
 //	public static double[][][] imageRGBtoDoubleArray(Image img) {
 //		int imgX = img.getW();

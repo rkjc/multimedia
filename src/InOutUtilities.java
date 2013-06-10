@@ -199,7 +199,7 @@ public class InOutUtilities {
 			writer.newLine();
 			for(int y = 0; y < macroBlock_Y; y++){
 				for(int x = 0; x < macroBlock_X; x++){
-					writer.write("[" + String.format("%3d", (motionVectors[x][y].getX())) + ", " + String.format("%3d", (motionVectors[x][y].getY())) + "]  ");	
+					writer.write("[" + String.format("%3d", (-motionVectors[x][y].getX())) + ", " + String.format("%3d", (-motionVectors[x][y].getY())) + "]  ");	
 				}
 				writer.newLine();
 				writer.newLine();
@@ -236,7 +236,7 @@ public class InOutUtilities {
 			writer.newLine();
 			for(int y = 0; y < macroBlock_Y; y++){
 				for(int x = 0; x < macroBlock_X; x++){
-					writer.write("[" + String.format("%5.1f", (((double)motionVectors[x][y].getX()) / 2.0)) + ", " + String.format("%5.1f", (((double)motionVectors[x][y].getY()) / 2.0)) + "]  ");	
+					writer.write("[" + String.format("%5.1f", ((double)(-motionVectors[x][y].getX()) / 2.0)) + ", " + String.format("%5.1f", ((double)(-motionVectors[x][y].getY()) / 2.0)) + "]  ");	
 				}
 				writer.newLine();
 				writer.newLine();
@@ -277,7 +277,7 @@ public class InOutUtilities {
 		int macroBlock_Y = motionVectors[0].length;
 		for(int y = 0; y < macroBlock_Y; y++){
 			for(int x = 0; x < macroBlock_X; x++){
-				System.out.print("[" + String.format("%3d", (motionVectors[x][y].getX())) + ", " + String.format("%3d", (motionVectors[x][y].getY())) + "]  ");
+				System.out.print("[" + String.format("%3d", (-motionVectors[x][y].getX())) + ", " + String.format("%3d", (-motionVectors[x][y].getY())) + "]  ");
 			}
 			System.out.println("");
 		}
@@ -293,7 +293,7 @@ public class InOutUtilities {
 		int macroBlock_Y = motionVectors[0].length;
 		for(int y = 0; y < macroBlock_Y; y++){
 			for(int x = 0; x < macroBlock_X; x++){
-				System.out.print("[" + String.format("%5.1f", (((double)motionVectors[x][y].getX()) / 2.0)) + ", " + String.format("%5.1f", (((double)motionVectors[x][y].getY()) / 2.0)) + "]  ");
+				System.out.print("[" + String.format("%5.1f", ((double)(-motionVectors[x][y].getX()) / 2.0)) + ", " + String.format("%5.1f", ((double)(-motionVectors[x][y].getY()) / 2.0)) + "]  ");
 			}
 			System.out.println("");
 		}
